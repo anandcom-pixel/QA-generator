@@ -65,7 +65,7 @@ A single, cohesive, card-based panel right at the top styled in clean cream (`#F
   - **Groq Qwen 3.8 27B** (`qwen/qwen3.8-27b`) — Ultra-low-latency Groq LPU inference.
 - **Dynamic API Routing**:
   - Gemini queries dispatch to `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}` with native JSON mode.
-  - Groq queries dispatch to `https://api.groq.com/openai/v1/chat/completions` with Bearer auth, model string `qwen/qwen3.8-27b`, standard `response_format: {"type": "json_object"}`, and strict system instruction `Return valid JSON only matching the requested schema`.
+  - Groq queries dispatch to `https://api.groq.com/openai/v1/chat/completions` with Bearer auth, model string `qwen/qwen3.8-27b`, standard `response_format: {"type": "json_object"}`, and strict system instruction `You must output valid JSON only, matching the required assessment structure without any markdown prefix or suffix.`
   - **Robust Multi-Layer JSON Sanitization & Parsing**: `cleanAndParseAssessmentJson()` handles `<think>` reasoning tags, markdown code blocks, trailing commas, unescaped LaTeX math formulas (`\alpha`, `\frac`, etc.), and unbalanced JSON truncation recovery.
 - **Provider-Aware Key Management**:
   - Automatically prompts users for their Groq key when switching to Groq if no key is stored.

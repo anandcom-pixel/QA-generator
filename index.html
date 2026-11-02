@@ -1951,52 +1951,36 @@
         throw new Error('Received an empty response from the AI model.');
       }
 
-      // 1. Direct fast parse attempt
+      // 1. Strip reasoning tags (<think>...</think>) & markdown code blocks
+      let text = rawText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+      text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+      // 2. Direct parse attempt after markdown stripping
       try {
-        return JSON.parse(rawText.trim());
+        return JSON.parse(text);
       } catch (e1) {
         // Fall through to progressive sanitization
       }
 
-      // 2. Remove AI reasoning / thought tags (<think>...</think>)
-      let text = rawText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-
-      // 3. Strip markdown code fences (```json ... ``` or ``` ... ```)
-      text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-      if (text.startsWith('```')) {
-        text = text.replace(/^```[a-z]*\s*/i, '');
-      }
-      if (text.endsWith('```')) {
-        text = text.replace(/\s*```$/, '');
-      }
-
-      // Quick retry after markdown & reasoning strip
-      try {
-        return JSON.parse(text);
-      } catch (e2) {
-        // Fall through to bracket boundary extraction
-      }
-
-      // 4. Extract first '{' to last '}'
+      // 3. Extract first '{' to last '}'
       const firstBrace = text.indexOf('{');
       const lastBrace = text.lastIndexOf('}');
       if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
         let extracted = text.substring(firstBrace, lastBrace + 1);
         try {
           return JSON.parse(extracted);
-        } catch (e3) {
-          // 5. Fix common LLM JSON syntax issues:
+        } catch (e2) {
+          // 4. Fix common LLM JSON syntax issues:
           // a) Remove trailing commas before closing } or ]
           let sanitized = extracted.replace(/,\s*([}\]])/g, '$1');
           try {
             return JSON.parse(sanitized);
-          } catch (e4) {
+          } catch (e3) {
             // b) Escape unescaped LaTeX backslashes (\alpha, \frac, \lambda, \times, etc.)
-            // In standard JSON, a backslash must be followed by " \ / b f n r t or uXXXX
             let escapedLatex = sanitized.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
             try {
               return JSON.parse(escapedLatex);
-            } catch (e5) {
+            } catch (e4) {
               // c) Repair prematurely truncated JSON by balancing open braces/brackets
               let repaired = escapedLatex.trim();
               let openBraces = (repaired.match(/{/g) || []).length;
@@ -2014,9 +1998,9 @@
               }
               try {
                 return JSON.parse(repaired);
-              } catch (e6) {
-                console.error('All JSON parsing attempts failed:', e3, rawText);
-                throw new Error(`Failed to parse AI JSON response: ${e3.message}. Click "🎲 Fresh Re-roll" to try again.`);
+              } catch (e5) {
+                console.error('All JSON parsing attempts failed:', e2, rawText);
+                throw new Error(`Failed to parse AI JSON response: ${e2.message}. Click "🎲 Fresh Re-roll" to try again.`);
               }
             }
           }
@@ -2122,7 +2106,7 @@
               messages: [
                 {
                   role: 'system',
-                  content: 'You are a distinguished national exam authority, university dean, and pedagogical assessment specialist. Return valid JSON only matching the requested schema with no surrounding text, markdown formatting, or code fences.'
+                  content: 'You must output valid JSON only, matching the required assessment structure without any markdown prefix or suffix.'
                 },
                 {
                   role: 'user',
@@ -2187,7 +2171,15 @@
         }
 
         updateLoadingStep(3, 'Parsing question matrix and LaTeX formulas...');
-        const parsedPaper = cleanAndParseAssessmentJson(rawJsonText);
+        // Clean raw response string (e.g. stripping ```json ``` markdown code blocks) before parsing
+        const cleanedText = rawJsonText.replace(/```json/g, '').replace(/```/g, '').trim();
+        let parsedPaper;
+        try {
+          parsedPaper = JSON.parse(cleanedText);
+        } catch (initialErr) {
+          console.warn('Direct parse failed, executing robust fallback parser:', initialErr);
+          parsedPaper = cleanAndParseAssessmentJson(cleanedText);
+        }
 
         updateLoadingStep(4, 'Rendering assessment paper and solutions...');
         stopLoadingTimer();
