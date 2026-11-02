@@ -872,7 +872,7 @@
         <button type="button" id="tabGroqBtn" onclick="switchApiKeyTab('groq')" 
                 class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 cursor-pointer">
           <i data-lucide="zap" class="w-3.5 h-3.5 text-orange-600"></i>
-          <span>Groq (GPT-OSS / Qwen)</span>
+          <span>Groq (Qwen 3.8 27B)</span>
         </button>
       </div>
 
@@ -925,7 +925,7 @@
       <!-- GROQ CLOUD TAB PANEL -->
       <div id="groqKeyPanel" class="space-y-3.5 mb-5 hidden">
         <p class="text-xs text-slate-700 leading-relaxed font-medium">
-          Key for <strong>Groq LPU (openai/gpt-oss-20b & qwen/qwen3.8-27b)</strong>. Dispatched directly to Groq's ultra-fast OpenAI-compatible endpoint (<code class="font-mono text-slate-800">https://api.groq.com/openai/v1/chat/completions</code>).
+          Key for <strong>Groq LPU (qwen/qwen3.8-27b)</strong>. Dispatched directly to Groq's ultra-fast OpenAI-compatible endpoint (<code class="font-mono text-slate-800">https://api.groq.com/openai/v1/chat/completions</code>).
         </p>
 
         <div>
@@ -960,7 +960,7 @@
               <i data-lucide="cpu" class="w-3.5 h-3.5 text-orange-600"></i>
               Configured Model:
             </span>
-            <span class="font-mono text-[11px] text-orange-800 bg-orange-100/80 border border-orange-300 px-2 py-0.5 rounded-md font-bold">openai/gpt-oss-20b</span>
+            <span class="font-mono text-[11px] text-orange-800 bg-orange-100/80 border border-orange-300 px-2 py-0.5 rounded-md font-bold">qwen/qwen3.8-27b</span>
           </div>
           <p class="text-[11px] text-slate-600 leading-normal">
             Ultra-fast inference using Groq LPUs with <code class="font-mono text-slate-800">response_format: {"type": "json_object"}</code>.
@@ -1090,7 +1090,6 @@
               <option value="gemini-3.8-flash">Google Gemini (gemini-3.8-flash)</option>
             </optgroup>
             <optgroup label="Groq Cloud LPU">
-              <option value="openai/gpt-oss-20b">Groq - GPT-OSS 20B (openai/gpt-oss-20b)</option>
               <option value="qwen/qwen3.8-27b">Groq - Qwen 3.8 27B (qwen/qwen3.8-27b)</option>
             </optgroup>
           </select>
@@ -1147,7 +1146,7 @@
 
     function isGroqModel(modelName) {
       const m = (modelName || STATE.selectedModel || '').toLowerCase();
-      return m.includes('openai/') || m.includes('gpt-oss') || m.includes('qwen') || m.includes('groq') || m.includes('llama');
+      return m.includes('qwen') || m.includes('groq');
     }
 
     function getActiveProvider() {
@@ -1519,8 +1518,13 @@
       STATE.geminiApiKey = localStorage.getItem('omniassess_gemini_api_key') || localStorage.getItem('omniassess_api_key') || '';
       STATE.groqApiKey = localStorage.getItem('omniassess_groq_api_key') || '';
       let savedModel = localStorage.getItem('omniassess_selected_model') || 'gemini-3.8-flash';
-      if (savedModel === 'llama-3.3-70b-versatile') {
-        savedModel = 'openai/gpt-oss-20b';
+      // Gracefully fallback deprecated or non-working models to qwen/qwen3.8-27b or gemini-3.8-flash
+      if (savedModel === 'openai/gpt-oss-20b' || savedModel.includes('gpt-oss') || savedModel === 'llama-3.3-70b-versatile') {
+        savedModel = 'qwen/qwen3.8-27b';
+        localStorage.setItem('omniassess_selected_model', savedModel);
+      }
+      if (savedModel !== 'gemini-3.8-flash' && savedModel !== 'qwen/qwen3.8-27b') {
+        savedModel = 'gemini-3.8-flash';
         localStorage.setItem('omniassess_selected_model', savedModel);
       }
       STATE.selectedModel = savedModel;
