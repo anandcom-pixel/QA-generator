@@ -1,0 +1,2988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniAssess AI | Any Topic Q&A Generator (Gemini 3.8 Flash)</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+              950: '#1e1b4b',
+            },
+            accent: {
+              50: '#ecfdf5',
+              500: '#10b981',
+              600: '#059669',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- KaTeX for Scientific & Math Notation -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+      }
+      .no-print, header, nav, #configPanel, #searchHero, #controlsBar, #actionFloatingBar, .toast-container, button.interactive-btn {
+        display: none !important;
+      }
+      #testPaperContainer {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .print-page-break {
+        page-break-before: always;
+      }
+      .question-card {
+        page-break-inside: avoid;
+        border: 1px solid #e2e8f0 !important;
+        margin-bottom: 1.25rem !important;
+        box-shadow: none !important;
+      }
+      .katex {
+        font-size: 1.05em !important;
+      }
+      .print-only-header {
+        display: block !important;
+      }
+    }
+
+    .print-only-header {
+      display: none;
+    }
+
+    /* Option selection animation */
+    .option-radio:checked + label {
+      border-color: #4f46e5;
+      background-color: #eef2ff;
+      color: #312e81;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="no-print sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Model Tag -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+              OmniAssess<span class="text-brand-600">AI</span>
+            </span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              gemini-3.8-flash
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500 hidden sm:block">Any Topic Q&A Generator</p>
+        </div>
+      </div>
+
+      <!-- Header Action Controls -->
+      <div class="flex items-center gap-2.5">
+        
+        <!-- API Key Status Button -->
+        <button id="apiKeyModalBtn" onclick="toggleApiKeyModal()" 
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 transition shadow-sm">
+          <i data-lucide="key" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span id="apiKeyStatusLabel">API Key</span>
+          <span id="apiKeyDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+        </button>
+
+        <!-- Help Modal Button -->
+        <button onclick="toggleHelpModal()" 
+                class="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition" 
+                title="Q&A Assessment Matrix & User Guide">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Quick Reset Button -->
+        <button onclick="resetAll()" 
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition"
+                title="Reset Blueprint">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span class="hidden md:inline">Reset</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ================= UNIFIED ASSESSMENT CONTROL PANEL ================= -->
+    <section id="unifiedControlPanel" class="no-print mb-8">
+      <div style="background-color: #FDFBD6;" class="rounded-3xl p-5 sm:p-8 text-slate-900 shadow-xl relative overflow-hidden border border-[#e2dea0]">
+        
+        <div class="relative z-10 max-w-5xl mx-auto space-y-6">
+
+          <!-- Header & Title Badge (Presets button removed for clean sequential flow) -->
+          <div class="pb-5 border-b border-[#ded88e]/80">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-100 text-brand-900 border border-brand-300 mb-2">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-700"></i>
+              <span>Universal Question & Answer Engine • Google Gemini 3.8 Flash</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+              Any Topic Q&A Generator
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-700 mt-1 max-w-2xl leading-relaxed">
+              Generate instant, comprehensive question papers and step-by-step solutions for any topic, subject, or exam.
+            </p>
+          </div>
+
+          <!-- ================= STEP 1: ENTER TOPIC / SYLLABUS ================= -->
+          <div style="background-color: #FDFBD6;" class="border border-[#ded88e] rounded-2xl p-4 sm:p-5 shadow-xs">
+            <div class="flex items-center justify-between mb-2">
+              <label for="topicInput" class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center">1</span>
+                <span>Step 1: Enter Any Topic</span>
+              </label>
+              <span class="text-[11px] text-slate-600 hidden sm:inline">Press Enter anytime to generate</span>
+            </div>
+            
+            <div class="relative flex items-center">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
+                <i data-lucide="search" class="w-5 h-5"></i>
+              </div>
+              <input type="text" id="topicInput" 
+                     onkeydown="if(event.key === 'Enter') triggerGeminiGeneration(false);"
+                     value="B.Tech CSE Sem 3: Data Structures (Trees, Graphs & Dynamic Programming)"
+                     placeholder="Enter any subject, chapter, semester, or topic... e.g. Quantum Mechanics, Class 12 Calculus, VLSI CMOS, AWS Architect"
+                     class="w-full pl-11 pr-16 py-3.5 bg-white text-slate-900 rounded-xl border border-slate-300 focus:border-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-500/20 text-xs sm:text-sm transition duration-200 placeholder:text-slate-500 font-medium shadow-inner">
+              
+              <button type="button" onclick="clearSearchInput()" 
+                      class="absolute right-3 px-2 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition cursor-pointer"
+                      title="Clear topic input">
+                Clear
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-700 mt-2 font-medium">
+              Supports School Boards, B.Tech Engineering, Entrance Exams, Professional Certifications, or open academic subjects.
+            </p>
+          </div>
+
+          <!-- ================= STEP 2: CHOOSE DISCIPLINE / FIELD ================= -->
+          <div style="background-color: #FDFBD6;" class="border border-[#ded88e] rounded-2xl p-4 sm:p-5 shadow-xs">
+            <div class="flex items-center justify-between mb-2.5">
+              <label for="subjectSelect" class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center">2</span>
+                <span>Step 2: Choose Discipline / Field</span>
+              </label>
+              <span class="text-[11px] text-slate-600 hidden sm:inline">Add custom subjects with the + button</span>
+            </div>
+
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              <!-- Dropdown Selector -->
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <select id="subjectSelect" onchange="handleSubjectChange(this.value)" 
+                        class="px-3 py-2 rounded-xl bg-white text-slate-900 border border-slate-300 text-xs font-medium focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none cursor-pointer max-w-[220px] truncate shadow-xs">
+                  <!-- Dynamically populated by renderSubjectOptionsAndPills() -->
+                </select>
+              </div>
+
+              <!-- Quick Subject Pills Horizontal Scroller -->
+              <div id="subjectPillsList" class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar flex-1">
+                <!-- Dynamically populated with default & custom subject pills with delete (x) -->
+              </div>
+
+              <!-- Inline Quick Add Custom Subject Form -->
+              <div class="flex items-center gap-1.5 flex-shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#ded88e]">
+                <input type="text" id="newSubjectInput" 
+                       placeholder="Add custom subject..." 
+                       onkeydown="if(event.key === 'Enter') addCustomSubject();"
+                       class="px-3 py-1.5 rounded-xl bg-white text-slate-900 border border-slate-300 text-xs placeholder:text-slate-500 focus:border-brand-600 focus:outline-none w-36 sm:w-44 shadow-xs">
+                <button type="button" onclick="addCustomSubject()" 
+                        class="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs flex items-center gap-1 transition shadow-sm active:scale-95 cursor-pointer"
+                        title="Add custom subject to your Q&A generator">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  <span>Add</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= STEPS 3 & 4: TARGET LEVEL & DIFFICULTY (TWO-COLUMN GRID) ================= -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- STEP 3: TARGET LEVEL -->
+            <div style="background-color: #FDFBD6;" class="border border-[#ded88e] rounded-2xl p-4 sm:p-5 shadow-xs">
+              <label for="targetLevelSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-2 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center">3</span>
+                <span>Step 3: Select Target Standard / Level</span>
+              </label>
+              <select id="targetLevelSelect" 
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-white text-slate-900 border border-slate-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 text-xs sm:text-sm font-medium outline-none cursor-pointer shadow-xs">
+                <optgroup label="🎓 Engineering B.Tech / B.E. (Semesters 1-8)">
+                  <option value="Engineering Semester (B.Tech / B.E. Sem 1-8)" selected>Engineering Semester (B.Tech / B.E. Sem 1-8)</option>
+                  <option value="B.Tech / B.E. Sem 1 & 2 (First Year Foundation - Physics, Math, Basic EE/CSE)">B.Tech / B.E. Sem 1 & 2 (First Year Foundation)</option>
+                  <option value="B.Tech / B.E. Sem 3 & 4 (Second Year Core - Data Structures, Circuits, Mech)">B.Tech / B.E. Sem 3 & 4 (Second Year Core)</option>
+                  <option value="B.Tech / B.E. Sem 5 & 6 (Third Year Advanced - OS, Algorithms, DBMS, VLSI)">B.Tech / B.E. Sem 5 & 6 (Third Year Advanced)</option>
+                  <option value="B.Tech / B.E. Sem 7 & 8 (Final Year Capstone - AI/ML, Cloud, Systems)">B.Tech / B.E. Sem 7 & 8 (Final Year Capstone)</option>
+                </optgroup>
+                <optgroup label="🏫 School Boards & K-12 (CBSE / ICSE / State)">
+                  <option value="Class 12 / Senior Secondary (CBSE / ICSE / State)">Class 12 / Senior Secondary (CBSE / ICSE / State)</option>
+                  <option value="Class 11 / Junior College (CBSE / ICSE / State)">Class 11 / Junior College (CBSE / ICSE / State)</option>
+                  <option value="Class 10 / High School (CBSE / ICSE)">Class 10 / High School (CBSE / ICSE)</option>
+                  <option value="Class 9 / Secondary Foundation">Class 9 / Secondary Foundation</option>
+                </optgroup>
+                <optgroup label="🎯 National Competitive & Entrance">
+                  <option value="National Competitive (JEE / NEET / GATE / CAT)">National Competitive (JEE / NEET / GATE / CAT)</option>
+                  <option value="JEE Main & Advanced (Engineering Entrance)">JEE Main & Advanced (Engineering Entrance)</option>
+                  <option value="NEET-UG (Medical Entrance)">NEET-UG (Medical Entrance)</option>
+                  <option value="GATE (Graduate Aptitude Test in Engineering)">GATE (Graduate Aptitude Test in Engineering)</option>
+                  <option value="CAT / MBA Entrance (Quant, DILR, VARC)">CAT / MBA Entrance (Quant, DILR, VARC)</option>
+                  <option value="UPSC Civil Services / State PSC">UPSC Civil Services / State PSC</option>
+                </optgroup>
+                <optgroup label="💼 Professional & Tech Certifications">
+                  <option value="Professional Tech Certification (AWS / GCP / PMP)">Professional Tech Certification (AWS / GCP / PMP)</option>
+                  <option value="Software Engineering & Coding Interview (LeetCode / System Design)">Software Engineering Coding Interview</option>
+                  <option value="Project Management (PMP / Agile Scrum)">Project Management (PMP / Agile Scrum)</option>
+                  <option value="Chartered Financial Analyst (CFA) / Finance">Chartered Financial Analyst (CFA)</option>
+                </optgroup>
+                <optgroup label="🌐 University & Open Domains">
+                  <option value="Undergraduate / College University Degree">Undergraduate / College University Degree</option>
+                  <option value="Postgraduate / Master's Degree (M.Tech / M.S. / M.Sc)">Postgraduate / Master's Degree (M.Tech / M.S.)</option>
+                  <option value="General Open Domain / Self-Paced">General Open Domain / Self-Paced</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <!-- STEP 4: DIFFICULTY LEVEL -->
+            <div style="background-color: #FDFBD6;" class="border border-[#ded88e] rounded-2xl p-4 sm:p-5 shadow-xs">
+              <label for="difficultySelect" class="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-2 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center">4</span>
+                <span>Step 4: Select Difficulty Level</span>
+              </label>
+              <select id="difficultySelect" 
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-white text-slate-900 border border-slate-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 text-xs sm:text-sm font-medium outline-none cursor-pointer shadow-xs">
+                <option value="Foundational / Beginner">Foundational (Beginner / Core Definitions & Direct Checks)</option>
+                <option value="Moderate (Conceptual & Direct)">Moderate (Standard Curriculum & Core Formulas)</option>
+                <option value="Balanced (Mix of Standard & Rigorous)" selected>Balanced (Recommended: Standard & Analytical Mix)</option>
+                <option value="Challenging / High-Order Thinking (HOTS)">Challenging / HOTS (High-Order Thinking & Synthesis)</option>
+                <option value="Extreme Analytical / Olympiad / GATE">Extreme / Olympiad / GATE (Advanced Rigor & Tough Numericals)</option>
+              </select>
+            </div>
+
+          </div>
+
+          <!-- ================= OPTIONAL ADVANCED BLUEPRINT DRAWER ================= -->
+          <div style="background-color: #FDFBD6;" class="border border-[#ded88e] rounded-2xl overflow-hidden shadow-xs">
+            <button type="button" onclick="toggleBlueprintDrawer()" 
+                    class="w-full p-4 flex items-center justify-between text-left hover:bg-[#FAF7C5] transition cursor-pointer">
+              <div class="flex items-center gap-2.5">
+                <i data-lucide="sliders" class="w-4 h-4 text-brand-600"></i>
+                <div>
+                  <span class="text-xs sm:text-sm font-bold text-slate-900 block">
+                    Optional: Exam Architecture & Category Distribution Blueprint
+                  </span>
+                  <span class="text-[11px] text-slate-600">
+                    Switch between Academic & Competitive Format, customize question counts and exam duration
+                  </span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-800 border border-brand-200 font-mono font-bold hidden sm:inline">
+                  <span id="totalQuestionsBadge">12</span> Qs • <span id="totalMarksBadge">35</span> Marks
+                </span>
+                <i data-lucide="chevron-down" id="blueprintDrawerIcon" class="w-4 h-4 text-slate-600 transition-transform duration-200"></i>
+              </div>
+            </button>
+
+            <!-- Collapsed Blueprint Content -->
+            <div id="advancedBlueprintDrawer" class="hidden p-5 border-t border-[#ded88e] space-y-5 bg-[#FAF7C5]/60">
+              
+              <!-- Exam Mode Architecture Selection -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- Mode A: Academic / Board -->
+                <div id="modeCardBoard" onclick="switchExamMode('board')" 
+                     class="cursor-pointer rounded-xl p-4 border-2 transition-all relative overflow-hidden bg-white border-brand-600 ring-2 ring-brand-500/20 shadow-xs">
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <span class="text-[11px] font-bold uppercase tracking-wider text-brand-700">Mode A</span>
+                      <h4 class="font-bold text-slate-900 text-sm">Academic / University / Board Exam</h4>
+                      <p class="text-[11px] text-slate-600 mt-1">Structured 1M, 2M, 3M, 5M & Case-Based problems with step rubrics.</p>
+                    </div>
+                    <span id="boardModeRadio" class="w-4 h-4 rounded-full border-2 border-brand-600 bg-brand-600 flex items-center justify-center text-white flex-shrink-0">
+                      <i data-lucide="check" class="w-2.5 h-2.5"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Mode B: Competitive / Entrance -->
+                <div id="modeCardCompetitive" onclick="switchExamMode('competitive')" 
+                     class="cursor-pointer rounded-xl p-4 border-2 transition-all relative overflow-hidden bg-white/70 border-slate-300 hover:border-slate-400 shadow-xs">
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700">Mode B</span>
+                      <h4 class="font-bold text-slate-900 text-sm">Competitive / Entrance / Professional Exam</h4>
+                      <p class="text-[11px] text-slate-600 mt-1">Single/Multiple Correct MCQs (+4, -1), Numericals, Matrix Match & Assertion-Reason.</p>
+                    </div>
+                    <span id="compModeRadio" class="w-4 h-4 rounded-full border-2 border-slate-400 bg-transparent flex items-center justify-center text-transparent flex-shrink-0">
+                      <i data-lucide="check" class="w-2.5 h-2.5"></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Suggested Exam Duration -->
+              <div style="background-color: #FDFBD6;" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-[#ded88e] text-slate-900 shadow-2xs">
+                <label for="durationSelect" class="text-xs font-bold text-slate-900 flex items-center gap-2">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-brand-600"></i>
+                  <span>Suggested Exam Duration:</span>
+                </label>
+                <select id="durationSelect" 
+                        class="px-3 py-1.5 rounded-xl bg-white text-slate-900 border border-slate-300 text-xs font-medium focus:border-brand-600 outline-none shadow-xs">
+                  <option value="Auto-Calculate based on questions">Auto-Calculate based on questions</option>
+                  <option value="30 Minutes (Quick Quiz)">30 Minutes (Quick Quiz)</option>
+                  <option value="60 Minutes (Standard Class Test)" selected>60 Minutes (Standard Class Test)</option>
+                  <option value="90 Minutes (Mid-Term Assessment)">90 Minutes (Mid-Term Assessment)</option>
+                  <option value="180 Minutes (Full Length Mock)">180 Minutes (Full Length Mock)</option>
+                </select>
+              </div>
+
+              <!-- Section Title Header for Sliders -->
+              <div class="flex items-center justify-between pt-2">
+                <span id="blueprintSectionTitle" class="text-xs font-bold uppercase tracking-wider text-slate-900">
+                  Question Category Distribution
+                </span>
+                <button type="button" onclick="resetAll()" class="text-[11px] text-slate-600 hover:text-slate-900 underline cursor-pointer">
+                  Reset counts to default
+                </button>
+              </div>
+
+              <!-- Mode A Categories (Academic / Board / University Format) -->
+              <div id="boardCategoriesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <!-- Category 1: MCQs -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-brand-800 border border-brand-200">1 Mark</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Objective / MCQs</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="board_mcq_val">5</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">Single-option conceptual check</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('board_mcq', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="board_mcq" min="0" max="15" value="5" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('board_mcq', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+
+                <!-- Category 2: VSA -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-brand-800 border border-brand-200">2 Marks</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Very Short Answer (VSA)</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="board_vsa_val">3</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">1-2 sentences or direct formula</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('board_vsa', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="board_vsa" min="0" max="10" value="3" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('board_vsa', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+
+                <!-- Category 3: Short Answer -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-brand-800 border border-brand-200">3 Marks</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Short Answer (SA)</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="board_sa_val">2</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">Structured derivation or proof</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('board_sa', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="board_sa" min="0" max="8" value="2" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('board_sa', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+
+                <!-- Category 4: Long Answer -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-brand-800 border border-brand-200">5 Marks</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Long Answer (LA)</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="board_la_val">1</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">Comprehensive in-depth synthesis</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('board_la', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="board_la" min="0" max="5" value="1" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('board_la', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+
+                <!-- Category 5: Case-Based -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs sm:col-span-2 lg:col-span-2">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-brand-800 border border-brand-200">4 Marks</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Case-Based / Competency Passage</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="board_case_val">1</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">Real-world scenario with linked sub-questions</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('board_case', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="board_case" min="0" max="3" value="1" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('board_case', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode B Categories (Competitive / Professional Format) -->
+              <div id="competitiveCategoriesContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <!-- Comp 1: Single Correct -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">+4, -1</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Single Correct MCQs</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_sc_val">4</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">Standard 4-option single correct</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('comp_sc', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="comp_sc" min="0" max="15" value="4" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_sc', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+
+                <!-- Comp 2: Multiple Correct -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">Partial Mark</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Multiple Correct MCQs</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_mc_val">2</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">Advanced 1 or more options correct</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('comp_mc', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="comp_mc" min="0" max="10" value="2" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_mc', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+
+                <!-- Comp 3: Numerical -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200">+4, 0</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Numerical / Integer Type</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_num_val">2</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">Exact decimal or integer answer</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('comp_num', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="comp_num" min="0" max="10" value="2" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_num', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+
+                <!-- Comp 4: Assertion-Reason -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">Reasoning</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Assertion - Reasoning</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_ar_val">2</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">Statement I & II logical verification</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('comp_ar', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="comp_ar" min="0" max="8" value="2" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_ar', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+
+                <!-- Comp 5: Matrix Match -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800 border border-teal-200">Matrix</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Matrix Match Columns</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_mat_val">1</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">Column I (A-D) vs Column II (p-s)</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('comp_mat', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="comp_mat" min="0" max="4" value="1" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_mat', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+
+                <!-- Comp 6: Paragraph Comprehension -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <div>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">Passage</span>
+                      <h4 class="font-bold text-slate-900 text-xs mt-1">Paragraph Comprehension</h4>
+                    </div>
+                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_para_val">1</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mb-2.5">Context narrative with linked problems</p>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustCount('comp_para', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
+                    <input type="range" id="comp_para" min="0" max="4" value="1" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_para', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ================= SINGLE PRIMARY ACTION BUTTON ================= -->
+          <div class="pt-2">
+            <button id="generateBtn" type="button" onclick="triggerGeminiGeneration(false)" 
+                    class="w-full py-4 sm:py-5 px-8 rounded-2xl bg-gradient-to-r from-brand-600 via-indigo-600 to-brand-500 hover:from-brand-500 hover:to-indigo-500 text-white font-extrabold text-base sm:text-lg flex items-center justify-center gap-3 shadow-xl shadow-brand-500/35 hover:shadow-brand-500/50 active:scale-[0.99] transition-all cursor-pointer">
+              <i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i>
+              <span>Generate Q&A</span>
+            </button>
+
+            <!-- Sub Controls Bar -->
+            <div class="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700">
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-[#ded88e] text-slate-800 font-mono text-[11px] shadow-2xs">
+                  <i data-lucide="cpu" class="w-3 h-3 text-brand-600"></i>
+                  <span>gemini-3.8-flash</span>
+                </span>
+                <span id="randomSeedBadge" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 font-mono text-[11px] shadow-2xs">
+                  Seed: #100000
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="generateOfflineMock()" 
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-medium transition active:scale-95 cursor-pointer shadow-2xs"
+                        title="Generate sample test paper immediately without API key">
+                  <i data-lucide="flask-conical" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  <span>Offline Mock Demo</span>
+                </button>
+                <button id="rerollBtnBottom" type="button" onclick="triggerGeminiGeneration(true)" 
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-brand-300 bg-brand-50 hover:bg-brand-100 text-brand-800 font-bold transition active:scale-95 cursor-pointer shadow-2xs"
+                        title="Force a brand new randomized seed & variation for this topic">
+                  <i data-lucide="dice-5" class="w-3.5 h-3.5 text-brand-600"></i>
+                  <span>🎲 Fresh Re-roll</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <!-- ================= GENERATION LOADING PROGRESS INDICATOR ================= -->
+    <div id="loadingOverlay" class="hidden no-print mb-8">
+      <div style="background-color: #FDFBD6;" class="rounded-3xl p-8 border border-[#e2dea0] shadow-xl text-center max-w-xl mx-auto text-slate-900">
+        <div class="relative w-16 h-16 mx-auto mb-4">
+          <div class="absolute inset-0 rounded-full border-4 border-brand-100"></div>
+          <div class="absolute inset-0 rounded-full border-4 border-brand-600 border-t-transparent animate-spin"></div>
+          <div class="absolute inset-0 flex items-center justify-center text-brand-600">
+            <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <h3 id="loadingMainText" class="text-lg font-bold text-slate-900 mb-1">Synthesizing Examination Blueprint...</h3>
+        <p id="loadingSubText" class="text-xs text-slate-500 mb-3">Consulting Gemini 3.8 Flash model for topic-specific pedagogical balance</p>
+        
+        <!-- Timer countdown badge -->
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-mono mb-4">
+          <i data-lucide="timer" class="w-3.5 h-3.5 text-brand-600"></i>
+          <span>Elapsed: <span id="loadingElapsedSec">0s</span> | Timeout Guard: 35s</span>
+        </div>
+
+        <!-- Step tracker -->
+        <div class="space-y-2 text-left bg-white/80 p-4 rounded-xl border border-[#ded88e] text-xs text-slate-800">
+          <div id="step1" class="flex items-center gap-2 text-brand-600 font-medium">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            <span>1. Parsing curriculum scope & requested topic depth</span>
+          </div>
+          <div id="step2" class="flex items-center gap-2 text-slate-400">
+            <i data-lucide="circle-dashed" class="w-4 h-4 animate-spin"></i>
+            <span>2. Formulating questions & multiple-choice distractors</span>
+          </div>
+          <div id="step3" class="flex items-center gap-2 text-slate-400">
+            <i data-lucide="circle" class="w-4 h-4"></i>
+            <span>3. Structuring step-by-step marking rubrics & solutions</span>
+          </div>
+          <div id="step4" class="flex items-center gap-2 text-slate-400">
+            <i data-lucide="circle" class="w-4 h-4"></i>
+            <span>4. Compiling LaTeX equations & scientific schema</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= ERROR ALERT BANNER ================= -->
+    <div id="errorBanner" class="hidden no-print mb-6">
+      <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start justify-between gap-3 shadow-sm">
+        <div class="flex items-start gap-3">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <h4 class="font-bold text-sm text-rose-900" id="errorTitle">Generation Encountered an Issue</h4>
+            <p class="text-xs text-rose-700 mt-0.5" id="errorMessage">Unable to contact endpoint. Please check your API key or network connection.</p>
+            <div class="mt-2.5 flex items-center gap-2">
+              <button onclick="generateOfflineMock()" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                Load Offline Mock Fallback
+              </button>
+              <button onclick="toggleApiKeyModal()" class="px-3 py-1 bg-white border border-rose-300 hover:bg-rose-100 text-rose-800 rounded-lg text-xs font-medium transition">
+                Update API Key
+              </button>
+            </div>
+          </div>
+        </div>
+        <button onclick="document.getElementById('errorBanner').classList.add('hidden')" class="text-rose-400 hover:text-rose-600 p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= OUTPUT & ANSWER KEY CONTAINER ================= -->
+    <section id="resultsSection" class="hidden">
+      
+      <!-- Toolbar Controls (Sticky on Scroll) -->
+      <div id="controlsBar" class="no-print bg-white/95 backdrop-blur-md sticky top-16 z-30 py-3 mb-6 border-y border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+        
+        <!-- View Toggle (Student View vs Teacher / Rubric View) -->
+        <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
+          <button id="viewBtnStudent" onclick="setViewMode('student')" 
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-800 shadow-sm">
+            <i data-lucide="book" class="w-3.5 h-3.5 text-brand-600"></i>
+            <span>Student Mode (Exam Paper)</span>
+          </button>
+          <button id="viewBtnTeacher" onclick="setViewMode('teacher')" 
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+            <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Teacher Mode (Full Solutions)</span>
+          </button>
+        </div>
+
+        <!-- Section Navigation Filters -->
+        <div id="sectionFilterTabs" class="flex items-center gap-1 overflow-x-auto py-1 max-w-md text-xs no-scrollbar">
+          <!-- Populated dynamically with 'All', 'Section A', 'Section B' etc. -->
+        </div>
+
+        <!-- Master Solution Visibility & Export Group -->
+        <div class="flex items-center gap-2 flex-wrap">
+          
+          <!-- Master Solution Toggle -->
+          <button id="masterSolutionBtn" onclick="toggleAllSolutions()" 
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 transition shadow-sm">
+            <i data-lucide="eye" id="masterSolutionIcon" class="w-3.5 h-3.5 text-brand-600"></i>
+            <span id="masterSolutionLabel">Show All Solutions</span>
+          </button>
+
+          <!-- Re-roll variation from toolbar -->
+          <button id="rerollBtnToolbar" type="button" onclick="triggerGeminiGeneration(true)" 
+                  class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-sm" 
+                  title="Generate fresh variation for this topic">
+            <i data-lucide="dice-5" class="w-4 h-4 text-indigo-600"></i>
+          </button>
+
+          <!-- Export Utilities Buttons -->
+          <div class="flex items-center gap-1.5">
+            <!-- Copy to Clipboard -->
+            <button onclick="copyTestToClipboard()" 
+                    class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-sm" 
+                    title="Copy to Clipboard">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Export as Markdown -->
+            <button onclick="exportMarkdown()" 
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 transition shadow-sm"
+                    title="Download as Markdown file">
+              <i data-lucide="file-text" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span class="hidden sm:inline">Export .md</span>
+            </button>
+
+            <!-- Print / Save as PDF -->
+            <button onclick="triggerPrint()" 
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-sm"
+                    title="Print or Save as PDF">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+              <span>Print / PDF</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Formal Test Paper Container -->
+      <div id="testPaperContainer" style="background-color: #FDFBD6;" class="rounded-3xl p-6 sm:p-10 border border-[#e2dea0] shadow-xl transition-all text-slate-900">
+        
+        <!-- Printable Formal Header -->
+        <div class="text-center pb-6 mb-8 border-b-2 border-slate-900">
+          <div class="uppercase tracking-widest text-xs font-extrabold text-slate-500 mb-1">
+            Standardized Assessment & Evaluation System
+          </div>
+          <h2 id="paperTitle" class="text-xl sm:text-3xl font-extrabold text-slate-900 mb-2">
+            Universal Q&A Assessment Paper
+          </h2>
+          <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-600 mt-2">
+            <span class="flex items-center gap-1"><i data-lucide="tag" class="w-3.5 h-3.5 text-slate-400"></i> Scope: <span id="paperTopic" class="text-slate-900 font-bold">Data Structures</span></span>
+            <span>•</span>
+            <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i> Time: <span id="paperDuration" class="text-slate-900 font-bold">60 Mins</span></span>
+            <span>•</span>
+            <span class="flex items-center gap-1"><i data-lucide="award" class="w-3.5 h-3.5 text-slate-400"></i> Max Marks: <span id="paperMarks" class="text-slate-900 font-bold">30</span></span>
+            <span>•</span>
+            <span class="flex items-center gap-1"><i data-lucide="help-circle" class="w-3.5 h-3.5 text-slate-400"></i> Mode: <span id="paperModeTag" class="text-brand-600 font-bold">Academic / University</span></span>
+          </div>
+
+          <!-- General Instructions Box -->
+          <div class="mt-5 text-left bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700">
+            <div class="font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+              <i data-lucide="info" class="w-3.5 h-3.5 text-brand-600"></i> General Instructions:
+            </div>
+            <ul id="paperInstructionsList" class="list-disc list-inside space-y-1 text-slate-600 pl-1 leading-relaxed">
+              <li>Read all questions thoroughly before attempting.</li>
+              <li>Show all required derivation steps and mathematical formulations for subjective questions.</li>
+              <li>For multiple choice questions, carefully observe whether single or multiple options are correct.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Rendered Sections & Questions List -->
+        <div id="questionsContainer" class="space-y-8">
+          <!-- Dynamically populated question cards -->
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================= API KEY CONFIGURATION MODAL ================= -->
+  <div id="apiKeyModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <i data-lucide="key" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Gemini API Key</h3>
+            <p class="text-xs text-slate-500">Secure client-side browser storage</p>
+          </div>
+        </div>
+        <button onclick="toggleApiKeyModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+        Your key is stored strictly in your browser's local storage and transmitted directly to Google's Gemini endpoint. It is never sent to any intermediate server.
+      </p>
+
+      <div class="space-y-3 mb-5">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            API Key
+          </label>
+          <div class="relative">
+            <input type="password" id="modalApiKeyInput" placeholder="AIzaSy..." 
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 text-xs font-mono text-slate-900 pr-10">
+            <button type="button" onclick="toggleApiKeyVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+              <i data-lucide="eye" id="eyeIcon" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-semibold text-slate-700">Endpoint Configured:</span>
+            <span class="font-mono text-[11px] text-emerald-600 font-bold">gemini-3.8-flash</span>
+          </div>
+          <p class="text-[11px] text-slate-500">
+            Configured with `responseMimeType: "application/json"` and fresh randomized nonces.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 pt-2">
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" 
+           class="text-xs text-brand-600 hover:text-brand-700 font-medium inline-flex items-center gap-1">
+          <span>Get Free Key</span>
+          <i data-lucide="external-link" class="w-3 h-3"></i>
+        </a>
+        <div class="flex items-center gap-2">
+          <button onclick="clearApiKey()" class="px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition">
+            Clear Key
+          </button>
+          <button onclick="saveApiKey()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-md transition">
+            Save Key
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= HELP & GUIDE MODAL ================= -->
+  <div id="helpModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+            <i data-lucide="help-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Any Topic Q&A Generator Guide</h3>
+            <p class="text-xs text-slate-500">Academic & competitive domain coverage</p>
+          </div>
+        </div>
+        <button onclick="toggleHelpModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs text-slate-600 max-h-96 overflow-y-auto pr-1 leading-relaxed">
+        <div class="p-3 rounded-xl bg-indigo-50/50 border border-indigo-200">
+          <h4 class="font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+            <i data-lucide="graduation-cap" class="w-4 h-4 text-brand-600"></i> Mode A: Academic / University / Board Mode
+          </h4>
+          <p>Maps to syllabus requirements: Class 10/12 Board Exams and Engineering B.Tech Semesters 1–8. Features 1M MCQs, 2M VSA, 3M SA, 5M/10M LA, and Case/Competency studies with step-by-step marking rubrics.</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-amber-50/50 border border-amber-200">
+          <h4 class="font-bold text-amber-900 mb-1 flex items-center gap-1.5">
+            <i data-lucide="target" class="w-4 h-4 text-amber-600"></i> Mode B: Competitive / Entrance / Professional Exam Mode
+          </h4>
+          <p>Emulates national exams (JEE Advanced, NEET, GATE, CAT, UPSC, AWS, PMP). Includes Single & Multiple Correct MCQs (with partial marking), Integer/Numerical Type, Assertion-Reasoning, Matrix Matching, and Paragraph Comprehension.</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-emerald-50/50 border border-emerald-200">
+          <h4 class="font-bold text-emerald-900 mb-1 flex items-center gap-1.5">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i> Custom Domain & Subject Management
+          </h4>
+          <p>You can add any custom subject using the "Add custom subject..." input. Added subjects are saved in your browser's local storage, added to the discipline dropdown and quick pills, and can be removed anytime with the delete button.</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-purple-50/50 border border-purple-200">
+          <h4 class="font-bold text-purple-900 mb-1 flex items-center gap-1.5">
+            <i data-lucide="dice-5" class="w-4 h-4 text-purple-600"></i> Fresh Randomization Engine
+          </h4>
+          <p>Every single generation request passes a high-entropy variation nonce and random seed to Gemini 3.8 Flash with cache-busting headers. This ensures brand-new questions, novel numerical figures, and original problem formulations every time.</p>
+        </div>
+      </div>
+
+      <div class="pt-4 mt-2 border-t border-slate-100 flex justify-end">
+        <button onclick="toggleHelpModal()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">
+          Got It
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION ================= -->
+  <div id="toast" class="toast-container fixed bottom-6 right-6 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-medium shadow-2xl border border-slate-700">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMessage">Action completed successfully</span>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="no-print mt-auto py-6 border-t border-slate-200 bg-white text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="font-extrabold text-slate-800">OmniAssess AI</span>
+        <span>•</span>
+        <span>Any Topic Q&A Generator</span>
+      </div>
+      <div class="flex items-center gap-3 text-slate-400">
+        <span>Powered by Google Gemini 3.8 Flash</span>
+        <span>•</span>
+        <span>Client-Side Local Storage Encrypted</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= CORE APPLICATION JAVASCRIPT ================= -->
+  <script>
+    /* ================= APP STATE ================= */
+    const STATE = {
+      apiKey: '',
+      currentExamMode: 'board', // 'board' or 'competitive'
+      viewMode: 'student',      // 'student' or 'teacher'
+      currentPaper: null,       // Loaded or generated assessment paper object
+      allSolutionsVisible: false,
+      userAnswers: {},          // Tracks student practice answers { questionId: selectedValue }
+      activeSectionFilter: 'ALL',
+      loadingTimerInterval: null,
+      abortController: null,
+      currentDiscipline: 'Computer Science & IT',
+      customSubjects: [],       // [{ id: 'cust_...', name: 'Robotics' }]
+      counts: {
+        board_mcq: 5,
+        board_vsa: 3,
+        board_sa: 2,
+        board_la: 1,
+        board_case: 1,
+        comp_sc: 4,
+        comp_mc: 2,
+        comp_num: 2,
+        comp_ar: 2,
+        comp_mat: 1,
+        comp_para: 1
+      }
+    };
+
+    /* Built-in Core Disciplines */
+    const BUILTIN_DISCIPLINES = [
+      { name: "General / Interdisciplinary", icon: "🌐", pill: "All" },
+      { name: "Physics", icon: "⚛️", pill: "⚛️ Physics" },
+      { name: "Chemistry", icon: "🧪", pill: "🧪 Chemistry" },
+      { name: "Mathematics", icon: "📐", pill: "📐 Math" },
+      { name: "Biology & Life Sciences", icon: "🧬", pill: "🧬 Biology" },
+      { name: "Computer Science & IT", icon: "💻", pill: "💻 CS & IT" },
+      { name: "Engineering Core (ECE / ME / CE / EE)", icon: "⚙️", pill: "⚙️ Engineering" },
+      { name: "Economics & Commerce", icon: "📈", pill: "📈 Economics" },
+      { name: "History & Geopolitics", icon: "🏛️", pill: "🏛️ History" },
+      { name: "Literature & Languages", icon: "📖", pill: "📖 Literature" },
+      { name: "Philosophy & Social Sciences", icon: "🧠", pill: "🧠 Philosophy" },
+      { name: "Medicine & Health Sciences", icon: "🩺", pill: "🩺 Medicine" },
+      { name: "Business & Management", icon: "💼", pill: "💼 Business" }
+    ];
+
+    /* ================= DOMAIN SYLLABUS PRESETS ================= */
+    const DOMAIN_PRESETS = {
+      school: [
+        { label: "📐 Class 12 Math: Definite Integrals & Area Under Curves", mode: "board", level: "Class 12 / Senior Secondary (CBSE / ICSE / State)", subject: "Mathematics" },
+        { label: "⚛️ Class 12 Physics: Wave Optics & Photoelectric Effect", mode: "board", level: "Class 12 / Senior Secondary (CBSE / ICSE / State)", subject: "Physics" },
+        { label: "🧪 Class 12 Chemistry: Aldehydes, Ketones & Carboxylic Acids", mode: "board", level: "Class 12 / Senior Secondary (CBSE / ICSE / State)", subject: "Chemistry" },
+        { label: "🧬 Class 12 Biology: Molecular Basis of Inheritance & DNA", mode: "board", level: "Class 12 / Senior Secondary (CBSE / ICSE / State)", subject: "Biology & Life Sciences" },
+        { label: "💻 Class 12 Computer Science: Python Data Structures & File Handling", mode: "board", level: "Class 12 / Senior Secondary (CBSE / ICSE / State)", subject: "Computer Science & IT" },
+        { label: "📈 Class 12 Economics: National Income & Fiscal Policy", mode: "board", level: "Class 12 / Senior Secondary (CBSE / ICSE / State)", subject: "Economics & Commerce" },
+        { label: "🔬 Class 10 Science: Heredity, Evolution & Carbon Compounds", mode: "board", level: "Class 10 / High School (CBSE / ICSE)", subject: "Chemistry" },
+        { label: "🔢 Class 10 Math: Quadratic Equations & Trigonometry", mode: "board", level: "Class 10 / High School (CBSE / ICSE)", subject: "Mathematics" }
+      ],
+      engineering: [
+        { label: "💻 B.Tech CSE Sem 3: Data Structures (Trees, Graphs & Dynamic Programming)", mode: "board", level: "Engineering Semester (B.Tech / B.E. Sem 1-8)", subject: "Computer Science & IT" },
+        { label: "🖥️ B.Tech CSE Sem 4: Operating Systems (Virtual Memory & Concurrency)", mode: "board", level: "Engineering Semester (B.Tech / B.E. Sem 1-8)", subject: "Computer Science & IT" },
+        { label: "🗄️ B.Tech CSE Sem 5: Database Management Systems (Transactions & Normalization)", mode: "board", level: "Engineering Semester (B.Tech / B.E. Sem 1-8)", subject: "Computer Science & IT" },
+        { label: "⚡ B.Tech ECE Sem 4: Signals & Systems (Fourier, Laplace & Z-Transform)", mode: "board", level: "Engineering Semester (B.Tech / B.E. Sem 1-8)", subject: "Engineering Core (ECE / ME / CE / EE)" },
+        { label: "🔬 B.Tech ECE Sem 5: VLSI Design & CMOS Inverter Delay Analysis", mode: "board", level: "Engineering Semester (B.Tech / B.E. Sem 1-8)", subject: "Engineering Core (ECE / ME / CE / EE)" },
+        { label: "🔥 B.Tech ME Sem 3: Applied Thermodynamics & Rankine Cycle", mode: "board", level: "Engineering Semester (B.Tech / B.E. Sem 1-8)", subject: "Engineering Core (ECE / ME / CE / EE)" },
+        { label: "🌊 B.Tech ME Sem 4: Fluid Mechanics & Navier-Stokes Equations", mode: "board", level: "Engineering Semester (B.Tech / B.E. Sem 1-8)", subject: "Engineering Core (ECE / ME / CE / EE)" },
+        { label: "🏗️ B.Tech CE Sem 4: Structural Analysis & Moment Distribution Method", mode: "board", level: "Engineering Semester (B.Tech / B.E. Sem 1-8)", subject: "Engineering Core (ECE / ME / CE / EE)" },
+        { label: "⚙️ B.Tech EE Sem 5: Control Systems (Root Locus & Nyquist Stability)", mode: "board", level: "Engineering Semester (B.Tech / B.E. Sem 1-8)", subject: "Engineering Core (ECE / ME / CE / EE)" },
+        { label: "🤖 B.Tech AI/ML Sem 6: Deep Learning, CNNs & Attention Mechanisms", mode: "board", level: "Engineering Semester (B.Tech / B.E. Sem 1-8)", subject: "Computer Science & IT" }
+      ],
+      competitive: [
+        { label: "🎯 JEE Advanced Physics: Rotational Dynamics & Conservation of Angular Momentum", mode: "competitive", level: "National Competitive (JEE / NEET / GATE / CAT)", subject: "Physics" },
+        { label: "📐 JEE Advanced Math: Definite Integrals as Limit of a Sum", mode: "competitive", level: "National Competitive (JEE / NEET / GATE / CAT)", subject: "Mathematics" },
+        { label: "🧬 NEET Biology: Human Endocrine System & Chemical Coordination", mode: "competitive", level: "National Competitive (JEE / NEET / GATE / CAT)", subject: "Biology & Life Sciences" },
+        { label: "🖥️ GATE CS: Theory of Computation (Decidability & Turing Machines)", mode: "competitive", level: "National Competitive (JEE / NEET / GATE / CAT)", subject: "Computer Science & IT" },
+        { label: "⚡ GATE ECE: Digital Signal Processing & Filter Design", mode: "competitive", level: "National Competitive (JEE / NEET / GATE / CAT)", subject: "Engineering Core (ECE / ME / CE / EE)" },
+        { label: "📊 CAT Quantitative Aptitude: Permutations, Combinations & Probability", mode: "competitive", level: "National Competitive (JEE / NEET / GATE / CAT)", subject: "Mathematics" },
+        { label: "🏛️ UPSC Civil Services GS-I: Indian National Movement & Post-Independence", mode: "board", level: "National Competitive (JEE / NEET / GATE / CAT)", subject: "History & Geopolitics" },
+        { label: "⚖️ UPSC Civil Services GS-II: Constitutional Provisions & Judicial Review", mode: "board", level: "National Competitive (JEE / NEET / GATE / CAT)", subject: "History & Geopolitics" }
+      ],
+      professional: [
+        { label: "☁️ AWS Certified Solutions Architect: Multi-Tier VPC, RDS & High Availability", mode: "competitive", level: "Professional Tech Certification (AWS / GCP / PMP)", subject: "Computer Science & IT" },
+        { label: "🧱 System Design & Distributed Systems: Consistent Hashing, Sharding & CAP Theorem", mode: "board", level: "Professional Tech Certification (AWS / GCP / PMP)", subject: "Computer Science & IT" },
+        { label: "🧑‍💻 Coding Interview: Hard Dynamic Programming & Advanced Graph Algorithms", mode: "competitive", level: "Professional Tech Certification (AWS / GCP / PMP)", subject: "Computer Science & IT" },
+        { label: "📋 PMP Exam: Agile Methodologies, Sprint Planning & Earned Value Management", mode: "competitive", level: "Professional Tech Certification (AWS / GCP / PMP)", subject: "Business & Management" },
+        { label: "📈 CFA Level 1: Capital Asset Pricing Model (CAPM) & Portfolio Theory", mode: "competitive", level: "Professional Tech Certification (AWS / GCP / PMP)", subject: "Economics & Commerce" }
+      ],
+      open: [
+        { label: "🍳 Culinary Arts: Molecular Gastronomy & The Chemistry of the Maillard Reaction", mode: "board", level: "General Open Domain / Self-Paced", subject: "Chemistry" },
+        { label: "🏛️ Ancient History: The Rise and Fall of the Western Roman Empire", mode: "board", level: "General Open Domain / Self-Paced", subject: "History & Geopolitics" },
+        { label: "🧠 Philosophy: Epistemology, Cartesian Doubt & Kant's Categorical Imperative", mode: "board", level: "General Open Domain / Self-Paced", subject: "Philosophy & Social Sciences" },
+        { label: "✈️ Aeronautical Science: Principles of Aerodynamic Lift, Drag & Propulsion", mode: "board", level: "General Open Domain / Self-Paced", subject: "Engineering Core (ECE / ME / CE / EE)" },
+        { label: "🎬 Film Studies: Cinematic Mise-en-scène, Montage Theory & Film Noir", mode: "board", level: "General Open Domain / Self-Paced", subject: "Literature & Languages" }
+      ]
+    };
+
+    /* ================= INITIALIZATION ================= */
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Initialize Icons
+      lucide.createIcons();
+
+      // 2. Load API Key from localStorage
+      loadSavedApiKey();
+
+      // 3. Load Custom Subjects from localStorage
+      loadSavedCustomSubjects();
+
+      // 4. Update question and marks tally
+      updateCounts();
+
+      // 5. Render Subject Dropdown and Pills
+      renderSubjectOptionsAndPills();
+
+      // 6. Populate default domain presets
+      switchDomainTab('engineering');
+
+      // 7. Default render of KaTeX if needed
+      initKaTeX();
+    });
+
+    function initKaTeX() {
+      if (typeof renderMathInElement !== 'undefined') {
+        const target = document.getElementById('testPaperContainer') || document.body;
+        renderMathInElement(target, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '\\[', right: '\\]', display: true}
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    /* ================= CUSTOM SUBJECT PERSISTENCE & MANAGEMENT ================= */
+    function loadSavedCustomSubjects() {
+      try {
+        const raw = localStorage.getItem('omniassess_custom_subjects');
+        if (raw) {
+          STATE.customSubjects = JSON.parse(raw);
+          if (!Array.isArray(STATE.customSubjects)) STATE.customSubjects = [];
+        } else {
+          STATE.customSubjects = [];
+        }
+      } catch (e) {
+        console.error('Failed to load custom subjects:', e);
+        STATE.customSubjects = [];
+      }
+      updateCustomSubjectCountBadge();
+    }
+
+    function saveCustomSubjects() {
+      try {
+        localStorage.setItem('omniassess_custom_subjects', JSON.stringify(STATE.customSubjects));
+      } catch (e) {
+        console.error('Failed to save custom subjects:', e);
+      }
+      updateCustomSubjectCountBadge();
+    }
+
+    function updateCustomSubjectCountBadge() {
+      const badge = document.getElementById('customSubjectCountBadge');
+      if (badge) badge.textContent = STATE.customSubjects.length;
+    }
+
+    function addCustomSubject() {
+      const input = document.getElementById('newSubjectInput');
+      const val = input.value.trim();
+
+      if (!val) {
+        showToast('Please type a subject name first!');
+        input.focus();
+        return;
+      }
+
+      // Check for duplicate in built-in or custom
+      const existsInBuiltin = BUILTIN_DISCIPLINES.some(d => d.name.toLowerCase() === val.toLowerCase());
+      const existsInCustom = STATE.customSubjects.some(s => s.name.toLowerCase() === val.toLowerCase());
+
+      if (existsInBuiltin || existsInCustom) {
+        showToast(`Subject "${val}" already exists!`);
+        setSubjectFilter(val);
+        input.value = '';
+        return;
+      }
+
+      const newSub = {
+        id: 'cust_' + Date.now(),
+        name: val,
+        createdAt: new Date().toISOString()
+      };
+
+      STATE.customSubjects.push(newSub);
+      saveCustomSubjects();
+
+      // Clear input
+      input.value = '';
+
+      // Re-render
+      renderSubjectOptionsAndPills();
+
+      // Automatically select the newly added subject
+      setSubjectFilter(val);
+
+      // If on the custom tab, re-render custom domain cards
+      const activeTab = document.querySelector('.domain-tab-btn.bg-brand-600')?.id;
+      if (activeTab === 'domainTab_custom') {
+        switchDomainTab('custom');
+      }
+
+      showToast(`Added custom subject: "${val}"`);
+      lucide.createIcons();
+    }
+
+    function deleteCustomSubject(subId, event) {
+      if (event) event.stopPropagation();
+
+      const idx = STATE.customSubjects.findIndex(s => s.id === subId);
+      if (idx === -1) return;
+
+      const deletedSubject = STATE.customSubjects[idx];
+      STATE.customSubjects.splice(idx, 1);
+      saveCustomSubjects();
+
+      // If the currently selected discipline was deleted, reset to General
+      if (STATE.currentDiscipline === deletedSubject.name) {
+        STATE.currentDiscipline = 'General / Interdisciplinary';
+      }
+
+      renderSubjectOptionsAndPills();
+
+      // If on custom domain tab, re-render cards
+      const activeTab = document.querySelector('.domain-tab-btn.bg-brand-600')?.id;
+      if (activeTab === 'domainTab_custom') {
+        switchDomainTab('custom');
+      }
+
+      showToast(`Removed subject: "${deletedSubject.name}"`);
+      lucide.createIcons();
+    }
+
+    /* ================= RENDER SUBJECT SELECT & PILLS ================= */
+    function renderSubjectOptionsAndPills() {
+      const select = document.getElementById('subjectSelect');
+      const pillsContainer = document.getElementById('subjectPillsList');
+
+      // 1. Populate Select Dropdown
+      select.innerHTML = '';
+      
+      const standardGroup = document.createElement('optgroup');
+      standardGroup.label = 'Core Disciplines';
+      BUILTIN_DISCIPLINES.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.name;
+        opt.textContent = `${d.icon} ${d.name}`;
+        standardGroup.appendChild(opt);
+      });
+      select.appendChild(standardGroup);
+
+      if (STATE.customSubjects.length > 0) {
+        const customGroup = document.createElement('optgroup');
+        customGroup.label = '⭐ My Custom Subjects';
+        STATE.customSubjects.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.name;
+          opt.textContent = `✨ ${s.name}`;
+          customGroup.appendChild(opt);
+        });
+        select.appendChild(customGroup);
+      }
+
+      // Restore selected value
+      select.value = STATE.currentDiscipline || 'Computer Science & IT';
+
+      // 2. Populate Horizontal Pills Bar
+      pillsContainer.innerHTML = '';
+
+      // Render built-in pills
+      BUILTIN_DISCIPLINES.slice(0, 9).forEach(d => {
+        const isCurrent = (d.name === STATE.currentDiscipline);
+        const pillBtn = document.createElement('button');
+        pillBtn.className = isCurrent 
+          ? 'subject-pill px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-brand-600 text-white transition whitespace-nowrap shadow-sm'
+          : 'subject-pill px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 transition whitespace-nowrap shadow-xs';
+        pillBtn.textContent = d.pill;
+        pillBtn.onclick = () => setSubjectFilter(d.name);
+        pillsContainer.appendChild(pillBtn);
+      });
+
+      // Render custom subject pills with delete 'x' button
+      STATE.customSubjects.forEach(s => {
+        const isCurrent = (s.name === STATE.currentDiscipline);
+        const pillWrap = document.createElement('span');
+        pillWrap.className = isCurrent 
+          ? 'custom-subject-pill inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-600 text-white transition whitespace-nowrap shadow-sm'
+          : 'custom-subject-pill inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 transition whitespace-nowrap shadow-xs';
+
+        pillWrap.innerHTML = `
+          <button onclick="setSubjectFilter('${escapeHtml(s.name)}')" class="hover:underline flex items-center gap-1">
+            <span>✨</span>
+            <span>${escapeHtml(s.name)}</span>
+          </button>
+          <button onclick="deleteCustomSubject('${s.id}', event)" title="Remove ${escapeHtml(s.name)}" class="text-slate-400 hover:text-rose-300 p-0.5 rounded transition">
+            <i data-lucide="x" class="w-3 h-3"></i>
+          </button>
+        `;
+        pillsContainer.appendChild(pillWrap);
+      });
+
+      lucide.createIcons();
+    }
+
+    function setSubjectFilter(subjectName) {
+      STATE.currentDiscipline = subjectName;
+      const select = document.getElementById('subjectSelect');
+      if (select) select.value = subjectName;
+      renderSubjectOptionsAndPills();
+      const shortName = subjectName.split('(')[0].split('&')[0].trim();
+      showToast(`Discipline filter: ${shortName}`);
+    }
+
+    function handleSubjectChange(val) {
+      STATE.currentDiscipline = val;
+      renderSubjectOptionsAndPills();
+      const shortName = val.split('(')[0].split('&')[0].trim();
+      showToast(`Discipline filter: ${shortName}`);
+    }
+
+    /* ================= DOMAIN EXPLORER SWITCHER ================= */
+    function switchDomainTab(tabKey) {
+      document.querySelectorAll('.domain-tab-btn').forEach(btn => {
+        btn.className = 'domain-tab-btn px-3 py-1.5 rounded-xl font-semibold transition bg-white/10 hover:bg-white/20 text-slate-300';
+      });
+      const activeBtn = document.getElementById(`domainTab_${tabKey}`);
+      if (activeBtn) {
+        activeBtn.className = 'domain-tab-btn px-3 py-1.5 rounded-xl font-semibold transition bg-brand-600 text-white shadow-sm';
+      }
+
+      const container = document.getElementById('domainPillsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (tabKey === 'custom') {
+        // Render Custom Subjects Tab
+        if (STATE.customSubjects.length === 0) {
+          container.innerHTML = `
+            <div class="p-3 rounded-xl bg-white/5 border border-dashed border-white/20 text-xs text-slate-400 flex items-center justify-between w-full">
+              <span>No custom subjects added yet. Type a subject in the "Add custom subject..." box above to create your own!</span>
+            </div>
+          `;
+        } else {
+          STATE.customSubjects.forEach(s => {
+            const pillSpan = document.createElement('div');
+            pillSpan.className = 'inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-200 transition text-xs font-semibold';
+            pillSpan.innerHTML = `
+              <button onclick="setTopic('${escapeHtml(s.name)}: Core Concepts & Advanced Problems', 'board', 'General Open Domain / Self-Paced', '${escapeHtml(s.name)}')" class="hover:underline flex items-center gap-1.5">
+                <span>⭐</span>
+                <span>${escapeHtml(s.name)}</span>
+              </button>
+              <button onclick="deleteCustomSubject('${s.id}', event)" title="Remove ${escapeHtml(s.name)}" class="text-amber-400 hover:text-rose-400 p-0.5 rounded transition">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+              </button>
+            `;
+            container.appendChild(pillSpan);
+          });
+        }
+      } else {
+        const presets = DOMAIN_PRESETS[tabKey] || [];
+        presets.forEach(p => {
+          const btn = document.createElement('button');
+          btn.className = 'px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/25 text-slate-200 transition text-[11px] font-medium flex items-center gap-1 active:scale-95';
+          btn.textContent = p.label;
+          btn.onclick = () => {
+            setTopic(p.label, p.mode, p.level, p.subject);
+          };
+          container.appendChild(btn);
+        });
+      }
+
+      lucide.createIcons();
+    }
+
+    /* ================= API KEY MANAGEMENT ================= */
+    function loadSavedApiKey() {
+      const savedKey = localStorage.getItem('omniassess_gemini_api_key') || '';
+      STATE.apiKey = savedKey;
+      const modalInput = document.getElementById('modalApiKeyInput');
+      if (modalInput) modalInput.value = savedKey;
+      updateApiKeyUI();
+    }
+
+    function updateApiKeyUI() {
+      const statusLabel = document.getElementById('apiKeyStatusLabel');
+      const dot = document.getElementById('apiKeyDot');
+      if (STATE.apiKey && STATE.apiKey.trim().length > 10) {
+        statusLabel.textContent = 'Key Active';
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+      } else {
+        statusLabel.textContent = 'Add API Key';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+      }
+    }
+
+    function toggleApiKeyModal() {
+      const modal = document.getElementById('apiKeyModal');
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden')) {
+        document.getElementById('modalApiKeyInput').focus();
+      }
+    }
+
+    
+    function toggleBlueprintDrawer() {
+      const drawer = document.getElementById('advancedBlueprintDrawer');
+      const icon = document.getElementById('blueprintDrawerIcon');
+      if (!drawer) return;
+      const isHidden = drawer.classList.contains('hidden');
+      if (isHidden) {
+        drawer.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+      } else {
+        drawer.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+      }
+    }
+
+    function togglePresetsDrawer() {
+      const drawer = document.getElementById('presetsDrawer');
+      const icon = document.getElementById('presetsDrawerIcon');
+      if (!drawer) return;
+      const isHidden = drawer.classList.contains('hidden');
+      if (isHidden) {
+        drawer.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+      } else {
+        drawer.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+      }
+    }
+
+    function toggleHelpModal() {
+      document.getElementById('helpModal').classList.toggle('hidden');
+    }
+
+    function toggleApiKeyVisibility() {
+      const input = document.getElementById('modalApiKeyInput');
+      const eyeIcon = document.getElementById('eyeIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        eyeIcon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        eyeIcon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+
+    function saveApiKey() {
+      const keyVal = document.getElementById('modalApiKeyInput').value.trim();
+      STATE.apiKey = keyVal;
+      localStorage.setItem('omniassess_gemini_api_key', keyVal);
+      updateApiKeyUI();
+      toggleApiKeyModal();
+      showToast(keyVal ? 'Gemini API Key securely saved!' : 'API key cleared');
+    }
+
+    function clearApiKey() {
+      STATE.apiKey = '';
+      localStorage.removeItem('omniassess_gemini_api_key');
+      document.getElementById('modalApiKeyInput').value = '';
+      updateApiKeyUI();
+      showToast('API key removed from browser storage');
+    }
+
+    /* ================= TOPIC & SEARCH UTILITIES ================= */
+    function setTopic(topic, mode, targetLevel, subject) {
+      const cleanTopic = topic.replace(/^[^\w\s]+\s*/, '');
+      document.getElementById('topicInput').value = cleanTopic;
+      
+      if (mode && mode !== STATE.currentExamMode) {
+        switchExamMode(mode);
+      }
+      if (targetLevel) {
+        const levelSelect = document.getElementById('targetLevelSelect');
+        levelSelect.value = targetLevel;
+      }
+      if (subject) {
+        setSubjectFilter(subject);
+      }
+      showToast(`Loaded: ${cleanTopic.split(':')[0]}`);
+    }
+
+    function clearSearchInput() {
+      document.getElementById('topicInput').value = '';
+      document.getElementById('topicInput').focus();
+    }
+
+    /* ================= EXAM MODE SWITCHING ================= */
+    function switchExamMode(mode) {
+      STATE.currentExamMode = mode;
+      
+      const cardBoard = document.getElementById('modeCardBoard');
+      const cardComp = document.getElementById('modeCardCompetitive');
+      const radioBoard = document.getElementById('boardModeRadio');
+      const radioComp = document.getElementById('compModeRadio');
+      const boardCont = document.getElementById('boardCategoriesContainer');
+      const compCont = document.getElementById('competitiveCategoriesContainer');
+
+      if (mode === 'board') {
+        // Mode A Active
+        if (cardBoard) cardBoard.className = 'cursor-pointer rounded-xl p-4 border-2 transition-all relative overflow-hidden bg-white border-brand-600 ring-2 ring-brand-500/20 shadow-xs';
+        if (cardComp) cardComp.className = 'cursor-pointer rounded-xl p-4 border-2 transition-all relative overflow-hidden bg-white/70 border-slate-300 hover:border-slate-400 shadow-xs';
+        if (radioBoard) radioBoard.className = 'w-4 h-4 rounded-full border-2 border-brand-600 bg-brand-600 flex items-center justify-center text-white flex-shrink-0';
+        if (radioComp) radioComp.className = 'w-4 h-4 rounded-full border-2 border-slate-400 bg-transparent flex items-center justify-center text-transparent flex-shrink-0';
+        if (boardCont) boardCont.classList.remove('hidden');
+        if (compCont) compCont.classList.add('hidden');
+        const titleEl = document.getElementById('blueprintSectionTitle');
+        if (titleEl) titleEl.textContent = 'Academic / University Category Distribution';
+      } else {
+        // Mode B Active
+        if (cardComp) cardComp.className = 'cursor-pointer rounded-xl p-4 border-2 transition-all relative overflow-hidden bg-white border-amber-600 ring-2 ring-amber-500/20 shadow-xs';
+        if (cardBoard) cardBoard.className = 'cursor-pointer rounded-xl p-4 border-2 transition-all relative overflow-hidden bg-white/70 border-slate-300 hover:border-slate-400 shadow-xs';
+        if (radioComp) radioComp.className = 'w-4 h-4 rounded-full border-2 border-amber-600 bg-amber-600 flex items-center justify-center text-white flex-shrink-0';
+        if (radioBoard) radioBoard.className = 'w-4 h-4 rounded-full border-2 border-slate-400 bg-transparent flex items-center justify-center text-transparent flex-shrink-0';
+        if (compCont) compCont.classList.remove('hidden');
+        if (boardCont) boardCont.classList.add('hidden');
+        const titleEl = document.getElementById('blueprintSectionTitle');
+        if (titleEl) titleEl.textContent = 'Competitive / Professional Category Distribution';
+      }
+
+      updateCounts();
+      lucide.createIcons();
+    }
+
+    /* ================= COUNTS & BLUEPRINT CALCULATIONS ================= */
+    function adjustCount(id, delta) {
+      const input = document.getElementById(id);
+      let val = parseInt(input.value, 10) + delta;
+      const min = parseInt(input.min, 10);
+      const max = parseInt(input.max, 10);
+      if (val < min) val = min;
+      if (val > max) val = max;
+      input.value = val;
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const keys = Object.keys(STATE.counts);
+      keys.forEach(k => {
+        const el = document.getElementById(k);
+        if (el) {
+          STATE.counts[k] = parseInt(el.value, 10);
+          const valEl = document.getElementById(`${k}_val`);
+          if (valEl) valEl.textContent = STATE.counts[k];
+        }
+      });
+
+      let totalQuestions = 0;
+      let totalMarks = 0;
+
+      if (STATE.currentExamMode === 'board') {
+        totalQuestions = STATE.counts.board_mcq + STATE.counts.board_vsa + STATE.counts.board_sa + STATE.counts.board_la + STATE.counts.board_case;
+        totalMarks = (STATE.counts.board_mcq * 1) + 
+                     (STATE.counts.board_vsa * 2) + 
+                     (STATE.counts.board_sa * 3) + 
+                     (STATE.counts.board_la * 5) + 
+                     (STATE.counts.board_case * 4);
+      } else {
+        totalQuestions = STATE.counts.comp_sc + STATE.counts.comp_mc + STATE.counts.comp_num + STATE.counts.comp_ar + STATE.counts.comp_mat + STATE.counts.comp_para;
+        totalMarks = (STATE.counts.comp_sc * 4) + 
+                     (STATE.counts.comp_mc * 4) + 
+                     (STATE.counts.comp_num * 4) + 
+                     (STATE.counts.comp_ar * 4) + 
+                     (STATE.counts.comp_mat * 4) + 
+                     (STATE.counts.comp_para * 4);
+      }
+
+      document.getElementById('totalQuestionsBadge').textContent = totalQuestions;
+      document.getElementById('totalMarksBadge').textContent = totalMarks;
+    }
+
+    function resetAll() {
+      document.getElementById('topicInput').value = 'B.Tech CSE Sem 3: Data Structures (Trees, Graphs & Dynamic Programming)';
+      setSubjectFilter('Computer Science & IT');
+      switchExamMode('board');
+      
+      const defaults = {
+        board_mcq: 5, board_vsa: 3, board_sa: 2, board_la: 1, board_case: 1,
+        comp_sc: 4, comp_mc: 2, comp_num: 2, comp_ar: 2, comp_mat: 1, comp_para: 1
+      };
+
+      Object.entries(defaults).forEach(([k, v]) => {
+        const el = document.getElementById(k);
+        if (el) el.value = v;
+      });
+
+      updateCounts();
+      showToast('Reset to default assessment blueprint');
+    }
+
+    /* ================= FRESH NON-CACHED GEMINI GENERATION ================= */
+    async function triggerGeminiGeneration(isReroll = false) {
+      // 1. Immediately sync all configuration inputs and category sliders from the DOM
+      updateCounts();
+
+      const topicInput = document.getElementById('topicInput');
+      const topic = topicInput ? topicInput.value.trim() : '';
+      if (!topic) {
+        showToast('Please enter a topic, semester, or subject first!');
+        if (topicInput) topicInput.focus();
+        return;
+      }
+
+      // Synchronize discipline selector if changed
+      const subjSelect = document.getElementById('subjectSelect');
+      if (subjSelect && subjSelect.value) {
+        STATE.currentDiscipline = subjSelect.value;
+      }
+
+      if (!STATE.apiKey || STATE.apiKey.trim().length < 10) {
+        showError('Gemini API Key Required', 'Please enter your Google Gemini API key to query gemini-3.8-flash, or click "Load Offline Mock Fallback" to test immediately.');
+        toggleApiKeyModal();
+        return;
+      }
+
+      hideError();
+
+      // Temporarily hide previous results to prevent visual confusion while generating
+      const resultsSection = document.getElementById('resultsSection');
+      if (resultsSection) {
+        resultsSection.classList.add('hidden');
+      }
+
+      // Generate high-entropy randomization parameters to ensure NO CACHING
+      const randomSeed = Math.floor(Math.random() * 900000) + 100000;
+      const variationNonce = 'omni_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+      const timestamp = new Date().toISOString();
+
+      document.getElementById('randomSeedBadge').textContent = `Seed: #${randomSeed}`;
+
+      // Update loading panel banner with all active parameters
+      const modeLabel = STATE.currentExamMode === 'board' ? 'Academic / University' : 'Competitive / Entrance';
+      const discLabel = STATE.currentDiscipline || 'General';
+      const targetLevel = document.getElementById('targetLevelSelect')?.value || 'Standard';
+      const difficulty = document.getElementById('difficultySelect')?.value || 'Standard';
+
+      const mainTextEl = document.getElementById('loadingMainText');
+      if (mainTextEl) mainTextEl.textContent = `Synthesizing ${modeLabel} Assessment...`;
+      const subTextEl = document.getElementById('loadingSubText');
+      if (subTextEl) subTextEl.textContent = `Topic: "${topic}" • [${discLabel}] • Level: ${targetLevel} • ${difficulty}`;
+
+      // Show loading UI, disable buttons, and smoothly scroll down so user immediately sees progress
+      showLoading(true);
+      startLoadingTimer();
+
+      try {
+        // Setup AbortController for 35s timeout protection
+        if (STATE.abortController) {
+          STATE.abortController.abort();
+        }
+        STATE.abortController = new AbortController();
+        const timeoutId = setTimeout(() => {
+          if (STATE.abortController) {
+            STATE.abortController.abort();
+          }
+        }, 35000);
+
+        // Construct dynamic prompt with strict discipline & freshness instructions
+        const promptText = buildGeminiPrompt(topic, randomSeed, variationNonce, timestamp, isReroll);
+
+        // Required API Endpoint strictly using gemini-3.8-flash without extraneous query params
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(STATE.apiKey.trim())}`;
+
+        updateLoadingStep(1, `Dispatching blueprint with Random Seed #${randomSeed}...`);
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          signal: STATE.abortController.signal,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: promptText }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.65, // Higher entropy for non-cached variations
+              topP: 0.95,
+              responseMimeType: 'application/json'
+            }
+          })
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          const errMsg = errData.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+          throw new Error(`Gemini API Error: ${errMsg}`);
+        }
+
+        updateLoadingStep(2, 'Validating structured pedagogical JSON schema...');
+        const data = await response.json();
+        
+        const rawJsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!rawJsonText) {
+          throw new Error('Received an empty response from Gemini 3.8 Flash.');
+        }
+
+        updateLoadingStep(3, 'Parsing question matrix and LaTeX formulas...');
+        let parsedPaper;
+        try {
+          parsedPaper = JSON.parse(rawJsonText);
+        } catch (e) {
+          const cleaned = rawJsonText.replace(/```json/gi, '').replace(/```/g, '').trim();
+          parsedPaper = JSON.parse(cleaned);
+        }
+
+        updateLoadingStep(4, 'Rendering assessment paper and solutions...');
+        stopLoadingTimer();
+        showLoading(false);
+        renderTestPaper(parsedPaper);
+        showToast(isReroll ? `Fresh variation generated! (Seed #${randomSeed})` : 'Q&A Paper generated with Gemini 3.8 Flash!');
+
+      } catch (err) {
+        stopLoadingTimer();
+        showLoading(false);
+        console.error('Generation failure:', err);
+
+        if (err.name === 'AbortError') {
+          showError('Request Timed Out (35s Limit)', 'The Gemini API took longer than 35 seconds to respond. You can click "Load Offline Mock Fallback" to immediately view a fully structured mock test paper for this topic.');
+        } else {
+          showError('Generation Request Failed', `${err.message}. You can switch to the Offline Mock Generator to view a fully styled assessment immediately.`);
+        }
+      }
+    }
+
+    function buildGeminiPrompt(topic, randomSeed, variationNonce, timestamp, isReroll) {
+      const mode = STATE.currentExamMode;
+      const targetLevel = document.getElementById('targetLevelSelect').value;
+      const difficulty = document.getElementById('difficultySelect').value;
+      const duration = document.getElementById('durationSelect').value;
+      const subject = STATE.currentDiscipline || 'General / Interdisciplinary';
+
+      let combinedScope = topic;
+      if (subject && subject !== 'General / Interdisciplinary') {
+        combinedScope = `Discipline: ${subject} | Topic: ${topic}`;
+      }
+
+      let specLines = [];
+      if (mode === 'board') {
+        if (STATE.counts.board_mcq > 0) specLines.push(`- Objective/MCQs (1 Mark each): exactly ${STATE.counts.board_mcq} questions`);
+        if (STATE.counts.board_vsa > 0) specLines.push(`- Very Short Answer / VSA (2 Marks each): exactly ${STATE.counts.board_vsa} questions`);
+        if (STATE.counts.board_sa > 0) specLines.push(`- Short Answer / SA (3 Marks each): exactly ${STATE.counts.board_sa} questions`);
+        if (STATE.counts.board_la > 0) specLines.push(`- Long Answer / LA (5 Marks each): exactly ${STATE.counts.board_la} questions`);
+        if (STATE.counts.board_case > 0) specLines.push(`- Case-Based / Competency Passage (4 Marks each): exactly ${STATE.counts.board_case} case study passages with sub-questions`);
+      } else {
+        if (STATE.counts.comp_sc > 0) specLines.push(`- Single Correct MCQs (+4, -1 penalty): exactly ${STATE.counts.comp_sc} questions`);
+        if (STATE.counts.comp_mc > 0) specLines.push(`- Multiple Correct MCQs (JEE/Advanced style with partial marks): exactly ${STATE.counts.comp_mc} questions`);
+        if (STATE.counts.comp_num > 0) specLines.push(`- Numerical / Integer Value Type (exact value, no negative): exactly ${STATE.counts.comp_num} questions`);
+        if (STATE.counts.comp_ar > 0) specLines.push(`- Assertion-Reasoning (Assertion & Reason statements): exactly ${STATE.counts.comp_ar} questions`);
+        if (STATE.counts.comp_mat > 0) specLines.push(`- Matrix Match / Columns (Column I A-D vs Column II p-s): exactly ${STATE.counts.comp_mat} questions`);
+        if (STATE.counts.comp_para > 0) specLines.push(`- Paragraph / Analytical Comprehension: exactly ${STATE.counts.comp_para} passage with linked MCQs`);
+      }
+
+      return `You are a distinguished national exam authority, university dean, and pedagogical assessment specialist.
+Generate a complete, rigorous, and technically precise Question & Answer Paper.
+
+ENTROPY & UNPARALLELED NOVELTY DIRECTIVE:
+- VARIATION SEED: ${randomSeed}
+- VARIATION NONCE: ${variationNonce}
+- GENERATION TIMESTAMP: ${timestamp}
+- RE-ROLL RUN: ${isReroll ? 'YES (Generate brand-new alternatives)' : 'NO'}
+MANDATORY RULE: Under no circumstances should you output standard memorized textbook clichés or repetitive questions. Vary all numerical values, problem geometries, real-world case contexts, variable names, and algorithmic constraints to ensure a 100% fresh, novel, non-cached examination.
+
+EXAMINATION PARAMETERS:
+- PRIMARY DISCIPLINE / SUBJECT: "${subject}"
+- SPECIFIC TOPIC / QUESTION FOCUS: "${topic}"
+- TARGET PEDAGOGICAL SCOPE: "${combinedScope}"
+- TARGET LEVEL: "${targetLevel}"
+- EXAM ARCHITECTURE MODE: "${mode === 'board' ? 'Academic / University / Board Exam Format' : 'Competitive / Entrance / Professional Exam Format'}"
+- DIFFICULTY: "${difficulty}"
+- DURATION: "${duration}"
+
+CRITICAL DISCIPLINE ADAPTABILITY:
+Tailor the notation, conventions, terminology, and domain-specific rigor strictly to "${subject}":
+- If Physics: Emphasize physical laws, free-body diagrams, SI units, and vector mechanics.
+- If Chemistry: Emphasize chemical equations, reaction mechanisms, stoichiometry, and physical chemistry formulas.
+- If Mathematics: Emphasize analytical proofs, rigorous notation, lemmas, and algebraic derivations.
+- If Computer Science: Emphasize algorithmic complexities, pseudocode, data structures, and system design tradeoffs.
+- If Engineering: Emphasize practical specifications, engineering constraints, design procedures, and circuit/mechanical models.
+- If Economics/Commerce: Emphasize micro/macroeconomic models, market equilibriums, elasticity formulas, and fiscal equations.
+- If Custom/Other: Faithfully respect all specialized terminology, theories, equations, and literature relevant to "${subject}".
+
+REQUIRED QUESTION COUNTS & TYPES:
+${specLines.join('\n')}
+
+PEDAGOGICAL & SCIENTIFIC REQUIREMENTS:
+1. Every question must be original, mathematically rigorous, and authentic to the topic.
+2. Formats:
+   - For all mathematical, chemical, and physical formulas, use standard LaTeX enclosed in single dollar signs like $E = mc^2$ or $\\lambda = \\frac{h}{p}$ for inline equations, and double dollar signs for block equations.
+   - For Board/University Mode: Every question MUST include a detailed, step-by-step marking rubric indicating point distributions (e.g. "[1 Mark] Correct formula stated; [1 Mark] Substitution; [1 Mark] Final answer with SI units").
+   - For Competitive/Professional Mode: Include marking rules, partial marking rubrics, and comprehensive step-by-step solutions explaining distractor rationales.
+   - For Multiple Correct MCQs: "correctAnswer" must be a JSON array of correct option letters, e.g. ["A", "C"].
+   - For Matrix Match: Provide 4 items in columnA (keys A, B, C, D) and 4 items in columnB (keys p, q, r, s) with matching string in correctAnswer (e.g., "A->p,r; B->q; C->s; D->p").
+   - For Assertion-Reason: Provide assertion text, reason text, and standard 4 options: (A) Both A and R are true and R is correct explanation of A; (B) Both A and R true but R is not correct explanation; (C) A is true, R is false; (D) A is false, R is true.
+
+OUTPUT MUST BE VALID JSON STRICTLY ADHERING TO THIS SCHEMA:
+{
+  "testTitle": "string (Formal title of examination)",
+  "topic": "${topic}",
+  "examMode": "${mode}",
+  "targetLevel": "${targetLevel}",
+  "difficulty": "${difficulty}",
+  "estimatedTimeMinutes": 60,
+  "totalMarks": number,
+  "generalInstructions": [
+    "string instruction 1",
+    "string instruction 2",
+    "string instruction 3"
+  ],
+  "sections": [
+    {
+      "sectionTitle": "string (e.g. Section A: Objective & MCQs)",
+      "sectionType": "mcq_single | mcq_multi | numerical | assertion_reason | matrix_match | vsa | sa | la | case_based | comprehension",
+      "marksPerQuestion": number,
+      "negativeMarks": number,
+      "questions": [
+        {
+          "id": 1,
+          "questionNumber": "1",
+          "type": "mcq_single | mcq_multi | numerical | assertion_reason | matrix_match | vsa | sa | la | case_based | comprehension",
+          "typeLabel": "string (e.g. Single Correct MCQ)",
+          "marks": number,
+          "negativeMarks": number,
+          "passage": "string (only if case_based or comprehension, otherwise empty string)",
+          "questionText": "string (question description with LaTeX)",
+          "options": [
+            {"key": "A", "text": "option A text"},
+            {"key": "B", "text": "option B text"},
+            {"key": "C", "text": "option C text"},
+            {"key": "D", "text": "option D text"}
+          ],
+          "assertion": "string (only for assertion_reason)",
+          "reason": "string (only for assertion_reason)",
+          "columnA": [
+            {"key": "A", "text": "..."},
+            {"key": "B", "text": "..."},
+            {"key": "C", "text": "..."},
+            {"key": "D", "text": "..."}
+          ],
+          "columnB": [
+            {"key": "p", "text": "..."},
+            {"key": "q", "text": "..."},
+            {"key": "r", "text": "..."},
+            {"key": "s", "text": "..."}
+          ],
+          "correctAnswer": "A",
+          "detailedSolution": "string (step-by-step full derivation and explanation)",
+          "markingRubric": [
+            "string rubric item 1",
+            "string rubric item 2"
+          ],
+          "keyConcept": "string (core pedagogical formula or theorem)"
+        }
+      ]
+    }
+  ]
+}
+Return ONLY valid JSON.`;
+    }
+
+    /* ================= TIMER CONTROLS ================= */
+    function startLoadingTimer() {
+      let elapsed = 0;
+      const el = document.getElementById('loadingElapsedSec');
+      el.textContent = '0s';
+      if (STATE.loadingTimerInterval) clearInterval(STATE.loadingTimerInterval);
+      STATE.loadingTimerInterval = setInterval(() => {
+        elapsed++;
+        el.textContent = `${elapsed}s`;
+      }, 1000);
+    }
+
+    function stopLoadingTimer() {
+      if (STATE.loadingTimerInterval) {
+        clearInterval(STATE.loadingTimerInterval);
+        STATE.loadingTimerInterval = null;
+      }
+    }
+
+    /* ================= ENHANCED OFFLINE MOCK GENERATOR ================= */
+    function generateOfflineMock() {
+      // 1. Immediately sync all configuration inputs from UI
+      updateCounts();
+
+      const topicInput = document.getElementById('topicInput');
+      const topic = topicInput ? topicInput.value.trim() : 'Data Structures';
+      const subjSelect = document.getElementById('subjectSelect');
+      if (subjSelect && subjSelect.value) {
+        STATE.currentDiscipline = subjSelect.value;
+      }
+      const mode = STATE.currentExamMode;
+      const modeLabel = mode === 'board' ? 'Academic / University' : 'Competitive / Professional';
+      const discLabel = STATE.currentDiscipline || 'General';
+
+      hideError();
+      const resultsSection = document.getElementById('resultsSection');
+      if (resultsSection) resultsSection.classList.add('hidden');
+
+      const mainTextEl = document.getElementById('loadingMainText');
+      if (mainTextEl) mainTextEl.textContent = `Compiling Offline ${modeLabel} Mock...`;
+      const subTextEl = document.getElementById('loadingSubText');
+      if (subTextEl) subTextEl.textContent = `Topic: "${topic}" • [${discLabel}]`;
+
+      showLoading(true);
+      startLoadingTimer();
+      updateLoadingStep(1, 'Compiling offline curriculum blueprint...');
+
+      setTimeout(() => {
+        updateLoadingStep(2, 'Synthesizing pedagogical questions with LaTeX formulas...');
+        setTimeout(() => {
+          updateLoadingStep(3, 'Formulating step-by-step marking rubrics...');
+          setTimeout(() => {
+            const mockPaper = buildOfflineMockPaper(topic, mode);
+            stopLoadingTimer();
+            showLoading(false);
+            renderTestPaper(mockPaper);
+            showToast('Offline Mock Assessment loaded successfully!');
+          }, 350);
+        }, 350);
+      }, 350);
+    }
+
+    function buildOfflineMockPaper(topic, mode) {
+      const isBoard = mode === 'board';
+      const topicLower = topic.toLowerCase();
+      const subject = STATE.currentDiscipline || '';
+
+      const isCSE = subject.includes('Computer Science') || topicLower.includes('data structure') || topicLower.includes('algorithm') || topicLower.includes('tree') || topicLower.includes('graph') || topicLower.includes('operating system');
+      
+      if (isCSE && isBoard) {
+        return {
+          testTitle: `University Examination: ${topic}`,
+          topic: topic,
+          examMode: 'board',
+          targetLevel: document.getElementById('targetLevelSelect').value,
+          difficulty: document.getElementById('difficultySelect').value,
+          estimatedTimeMinutes: 90,
+          totalMarks: 35,
+          generalInstructions: [
+            "Part A: Objective & Short Answer Questions testing fundamental concepts.",
+            "Part B: Analytical proofs, algorithmic trace, and structural design problems.",
+            "State all assumptions clearly and write pseudocode where appropriate."
+          ],
+          sections: [
+            {
+              sectionTitle: "Part A: Objective & Conceptual Checks (1-2 Marks)",
+              sectionType: "mcq_single",
+              marksPerQuestion: 1,
+              negativeMarks: 0,
+              questions: [
+                {
+                  id: 301,
+                  questionNumber: "1",
+                  type: "mcq_single",
+                  typeLabel: "Objective / MCQ",
+                  marks: 1,
+                  negativeMarks: 0,
+                  passage: "",
+                  questionText: "What is the worst-case time complexity of searching for an element in an unbalanced Binary Search Tree (BST) containing $n$ elements?",
+                  options: [
+                    {key: "A", text: "$O(1)$"},
+                    {key: "B", text: "$O(\\log n)$"},
+                    {key: "C", text: "$O(n)$"},
+                    {key: "D", text: "$O(n \\log n)$"}
+                  ],
+                  correctAnswer: "C",
+                  detailedSolution: "In the worst-case scenario, keys are inserted in strictly ascending or descending order, causing the BST to degenerate into a skewed linked list of depth $n$. Searching in a degenerate BST requires traversing each node from root to leaf, giving a time complexity of $O(n)$.",
+                  markingRubric: [
+                    "[1 Mark] Correct option C with justification regarding skewed tree degeneration"
+                  ],
+                  keyConcept: "Degenerate BST Skewed Depth: $O(n)$"
+                },
+                {
+                  id: 302,
+                  questionNumber: "2",
+                  type: "vsa",
+                  typeLabel: "Very Short Answer",
+                  marks: 2,
+                  negativeMarks: 0,
+                  passage: "",
+                  questionText: "Define an AVL tree and state its balance factor condition for every node $v$.",
+                  options: [],
+                  correctAnswer: "Self-balancing BST where $|\\text{height}(L) - \\text{height}(R)| \\le 1$.",
+                  detailedSolution: "An AVL tree is a strictly self-balancing binary search tree. For every node $v$ in an AVL tree, the balance factor is defined as:\n$$\\text{BF}(v) = \\text{height}(\\text{left\\_subtree}) - \\text{height}(\\text{right\\_subtree})$$\nThe AVL invariant strictly mandates that $\\text{BF}(v) \\in \\{-1, 0, +1\\}$. If $|\\text{BF}(v)| > 1$, rotations are performed to restore balance.",
+                  markingRubric: [
+                    "[1 Mark] Exact definition of self-balancing BST",
+                    "[1 Mark] Balance Factor equation and valid range $\\{-1, 0, +1\\}$"
+                  ],
+                  keyConcept: "AVL Balance Invariant: $|h_L - h_R| \\le 1$"
+                }
+              ]
+            },
+            {
+              sectionTitle: "Part B: Algorithmic & Analytical Problems (3-5 Marks)",
+              sectionType: "sa",
+              marksPerQuestion: 3,
+              negativeMarks: 0,
+              questions: [
+                {
+                  id: 303,
+                  questionNumber: "3",
+                  type: "sa",
+                  typeLabel: "Short Answer",
+                  marks: 3,
+                  negativeMarks: 0,
+                  passage: "",
+                  questionText: "Using the master theorem, determine the asymptotic time complexity $T(n)$ for the divide-and-conquer recurrence:\n$$T(n) = 2T\\left(\\frac{n}{2}\\right) + O(n)$$",
+                  options: [],
+                  correctAnswer: "T(n) = O(n log n)",
+                  detailedSolution: "Given recurrence: $T(n) = a T(n/b) + f(n)$ with $a = 2, b = 2, f(n) = O(n^1)$.\nStep 1: Compute critical exponent $c = \\log_b a = \\log_2 2 = 1$.\nStep 2: Compare $n^{\\log_b a} = n^1$ with $f(n) = \\Theta(n^1)$.\nStep 3: Since $f(n) = \\Theta(n^{\\log_b a})$, this corresponds to Case 2 of the Master Theorem.\nTherefore, $T(n) = \\Theta(n^{\\log_b a} \\log n) = O(n \\log n)$.",
+                  markingRubric: [
+                    "[1 Mark] Identifying $a=2, b=2$ and $\\log_b a = 1$",
+                    "[1 Mark] Applying Master Theorem Case 2 condition",
+                    "[1 Mark] Correct asymptotic bound $\\Theta(n \\log n)$"
+                  ],
+                  keyConcept: "Master Theorem Case 2: $T(n) = \\Theta(n^{\\log_b a} \\log n)$"
+                },
+                {
+                  id: 304,
+                  questionNumber: "4",
+                  type: "la",
+                  typeLabel: "Long Answer",
+                  marks: 5,
+                  negativeMarks: 0,
+                  passage: "",
+                  questionText: "(a) Explain Dijkstra's Single Source Shortest Path Algorithm.\n(b) Why does Dijkstra's algorithm fail when a graph contains edges with negative weights? Illustrate with a brief counterexample.",
+                  options: [],
+                  correctAnswer: "Greedy relaxation assumes finalized vertex distances never decrease; negative edges violate this optimal substructure.",
+                  detailedSolution: "(a) Dijkstra's algorithm uses a greedy approach maintaining a min-priority queue of tentative distances. At each step, it extracts the unvisited vertex $u$ with minimum tentative distance $d[u]$, finalizes it, and relaxes all outgoing edges $(u, v)$:\n$$d[v] = \\min(d[v], d[u] + w(u, v))$$\n\n(b) Failure on Negative Edges: Dijkstra's algorithm assumes that once a vertex is marked 'visited' (extracted from the min-heap), its shortest path has been definitively found because all future edge extensions can only add non-negative costs. If negative weights exist, a longer path discovered later through another vertex could yield a smaller overall sum, invalidating the greedy choice.",
+                  markingRubric: [
+                    "[2 Marks] Algorithmic description with relaxation formula",
+                    "[2 Marks] Clear theoretical explanation of greedy premise breakdown",
+                    "[1 Mark] Counterexample with negative edge diagram or path trace"
+                  ],
+                  keyConcept: "Greedy Invariant & Negative Weight Failure"
+                }
+              ]
+            },
+            {
+              sectionTitle: "Part C: Engineering Case Study & System Design (4 Marks)",
+              sectionType: "case_based",
+              marksPerQuestion: 4,
+              negativeMarks: 0,
+              questions: [
+                {
+                  id: 305,
+                  questionNumber: "5",
+                  type: "case_based",
+                  typeLabel: "Case Study / Design",
+                  marks: 4,
+                  negativeMarks: 0,
+                  passage: "A high-frequency web cache requires storing the most recently requested $K = 10,000$ user sessions. The system must support two primary operations with strict latency constraints: (1) get(key) in $O(1)$ time, and (2) put(key, value) in $O(1)$ time. When capacity $K$ is reached, the Least Recently Used (LRU) session must be evicted.",
+                  questionText: "Based on the engineering specifications above, design an optimal data structure:\n(i) Which composite data structures should be combined to achieve $O(1)$ get and $O(1)$ put? [1.5 Marks]\n(ii) Describe the step-by-step eviction process when capacity is exceeded. [1.5 Marks]\n(iii) What is the overall auxiliary space complexity? [1 Mark]",
+                  options: [],
+                  correctAnswer: "Doubly Linked List + Hash Map (O(1) lookup & O(1) node detachment/splicing). Space: O(K).",
+                  detailedSolution: "(i) Optimal architecture: A Hash Map (Hash Table) combined with a Doubly Linked List (DLL).\n- The Hash Map maps keys to pointers/references of the corresponding DLL nodes, enabling $O(1)$ lookup.\n- The Doubly Linked List maintains temporal ordering: the head stores the Most Recently Used (MRU) node, and the tail stores the Least Recently Used (LRU) node.\n(ii) Eviction workflow:\n- Retrieve the tail node $t$ from the DLL.\n- Remove $t$'s key entry from the Hash Map in $O(1)$.\n- Splice out $t$ from the DLL by adjusting predecessor pointers in $O(1)$.\n- Insert the new node at the head of the DLL and add its pointer to the Hash Map.\n(iii) Space Complexity: $O(K)$, where $K$ is the cache capacity.",
+                  markingRubric: [
+                    "[1.5 Marks] Identifying Hash Map + Doubly Linked List combination",
+                    "[1.5 Marks] Step-wise eviction trace with pointer adjustments",
+                    "[1 Mark] Space complexity stated as $O(K)$"
+                  ],
+                  keyConcept: "LRU Cache Architecture: Hash Map + Doubly Linked List"
+                }
+              ]
+            }
+          ]
+        };
+      }
+
+      // Default Academic / Competitive Fallback
+      if (isBoard) {
+        return {
+          testTitle: `Comprehensive Examination: ${topic}`,
+          topic: topic,
+          examMode: 'board',
+          targetLevel: document.getElementById('targetLevelSelect').value,
+          difficulty: document.getElementById('difficultySelect').value,
+          estimatedTimeMinutes: 75,
+          totalMarks: 35,
+          generalInstructions: [
+            "This question paper contains 5 sections: Section A, B, C, D and E.",
+            "Section A comprises 5 MCQs of 1 mark each.",
+            "Section B comprises 3 Very Short Answer (VSA) type questions of 2 marks each.",
+            "Section C comprises 2 Short Answer (SA) type questions of 3 marks each.",
+            "Section D comprises 1 Long Answer (LA) type question of 5 marks.",
+            "Section E comprises 1 Case-Based unit of assessment of 4 marks."
+          ],
+          sections: [
+            {
+              sectionTitle: "Section A: Multiple Choice Questions (1 Mark Each)",
+              sectionType: "mcq_single",
+              marksPerQuestion: 1,
+              negativeMarks: 0,
+              questions: [
+                {
+                  id: 101,
+                  questionNumber: "1",
+                  type: "mcq_single",
+                  typeLabel: "Objective / MCQ",
+                  marks: 1,
+                  negativeMarks: 0,
+                  passage: "",
+                  questionText: `In the study of ${escapeHtml(topic)}, what fundamental principle governs conservation and equilibrium under boundary conditions?`,
+                  options: [
+                    {key: "A", text: "Conservation Law of Energy & State Function Formulation"},
+                    {key: "B", text: "Heisenberg Principle of Indeterminacy"},
+                    {key: "C", text: "Euler-Lagrange Variational Formulation"},
+                    {key: "D", text: "Linear Superposition Theorem"}
+                  ],
+                  correctAnswer: "A",
+                  detailedSolution: "Conservation of energy dictates that the net change in internal state is equal to external flux inputs minus dissipation: $\\Delta E = \\Phi_{\\text{in}} - \\Phi_{\\text{out}}$.",
+                  markingRubric: [
+                    "[1 Mark] Correct selection of option A"
+                  ],
+                  keyConcept: "State Equilibrium & Conservation Invariants"
+                }
+              ]
+            },
+            {
+              sectionTitle: "Section B: Analytical Short Problems (3 Marks)",
+              sectionType: "sa",
+              marksPerQuestion: 3,
+              negativeMarks: 0,
+              questions: [
+                {
+                  id: 102,
+                  questionNumber: "2",
+                  type: "sa",
+                  typeLabel: "Short Answer",
+                  marks: 3,
+                  negativeMarks: 0,
+                  passage: "",
+                  questionText: `State the primary governing relation relevant to ${escapeHtml(topic)} and provide a step-by-step mathematical deduction for its boundary conditions.`,
+                  options: [],
+                  correctAnswer: "Standard analytical derivation based on governing differential equations.",
+                  detailedSolution: `Step 1: Formulate the fundamental governing relation for ${escapeHtml(topic)}.\nStep 2: Apply continuity and Dirichlet/Neumann boundary conditions at $x = 0$ and $x = L$.\nStep 3: Solve the characteristic polynomial to determine physical eigenmodes.`,
+                  markingRubric: [
+                    "[1 Mark] Clear statement of governing equation",
+                    "[1 Mark] Application of boundary conditions",
+                    "[1 Mark] Final mathematical formulation"
+                  ],
+                  keyConcept: "Boundary Value Problem Formulation"
+                }
+              ]
+            }
+          ]
+        };
+      } else {
+        // Competitive Mode Mock
+        return {
+          testTitle: `High-Yield Entrance Assessment: ${topic}`,
+          topic: topic,
+          examMode: 'competitive',
+          targetLevel: document.getElementById('targetLevelSelect').value,
+          difficulty: document.getElementById('difficultySelect').value,
+          estimatedTimeMinutes: 60,
+          totalMarks: 32,
+          generalInstructions: [
+            "Section 1: Single Correct Option (+4, -1 penalty).",
+            "Section 2: Multiple Correct Options (+4 for all correct, partial marking, -2 for incorrect).",
+            "Section 3: Numerical / Integer Answer (+4 marks, 0 negative).",
+            "Section 4: Assertion - Reasoning (+4, -1 penalty).",
+            "Section 5: Matrix Match Column Format (+4 marks).",
+            "Section 6: Analytical Paragraph Comprehension (+4, -1 penalty)."
+          ],
+          sections: [
+            {
+              sectionTitle: "Section 1: Single Correct Option (+4, -1)",
+              sectionType: "mcq_single",
+              marksPerQuestion: 4,
+              negativeMarks: 1,
+              questions: [
+                {
+                  id: 201,
+                  questionNumber: "1",
+                  type: "mcq_single",
+                  typeLabel: "Single Correct Option",
+                  marks: 4,
+                  negativeMarks: 1,
+                  passage: "",
+                  questionText: "An electron (mass $m$) and a photon each possess a wavelength of $\\lambda = 1.00\\text{ nm}$. Let $E_e$ be the kinetic energy of the electron and $E_p$ be the energy of the photon. The ratio $E_e / E_p$ is approximately equal to: (Take $c = 3 \\times 10^8\\text{ m/s}$, $h = 6.63 \\times 10^{-34}\\text{ J}\\cdot\\text{s}$)",
+                  options: [
+                    {key: "A", text: "$1 : 1$"},
+                    {key: "B", text: "$1 : 820$"},
+                    {key: "C", text: "$820 : 1$"},
+                    {key: "D", text: "$1 : 1640$"}
+                  ],
+                  correctAnswer: "B",
+                  detailedSolution: "Step 1: For the photon, $E_p = \\frac{hc}{\\lambda}$.\nStep 2: For the non-relativistic electron, $p = \\frac{h}{\\lambda} \\implies E_e = \\frac{p^2}{2m} = \\frac{h^2}{2m\\lambda^2}$.\nStep 3: Calculating ratio:\n$$\\frac{E_e}{E_p} = \\frac{h^2 / (2m\\lambda^2)}{hc / \\lambda} = \\frac{h}{2mc\\lambda}$$\nSubstituting values:\n$$\\frac{E_e}{E_p} = \\frac{6.626 \\times 10^{-34}}{2 \\times (9.11 \\times 10^{-31}) \\times (3 \\times 10^8) \\times (1.0 \\times 10^{-9})} = \\frac{6.626 \\times 10^{-34}}{5.466 \\times 10^{-31}} \\approx 1.212 \\times 10^{-3} \\approx \\frac{1}{825} \\approx \\frac{1}{820}$$.\nHence, option B is correct.",
+                  markingRubric: [
+                    "[+4 Marks] Correct option B ($1 : 820$)",
+                    "[-1 Mark] Any other choice"
+                  ],
+                  keyConcept: "Ratio $\\frac{E_e}{E_p} = \\frac{h}{2mc\\lambda}$"
+                }
+              ]
+            },
+            {
+              sectionTitle: "Section 2: Multiple Correct Options (+4, Partial Marking, -2)",
+              sectionType: "mcq_multi",
+              marksPerQuestion: 4,
+              negativeMarks: 2,
+              questions: [
+                {
+                  id: 202,
+                  questionNumber: "2",
+                  type: "mcq_multi",
+                  typeLabel: "Multiple Correct Options",
+                  marks: 4,
+                  negativeMarks: 2,
+                  passage: "",
+                  questionText: "Consider a particle of mass $m$ confined in an infinite one-dimensional potential well between $x = 0$ and $x = L$. Which of the following statements are TRUE? (Select all that apply)",
+                  options: [
+                    {key: "A", text: "The energy eigenvalues are proportional to $n^2$, where $n = 1, 2, 3, \\dots$"},
+                    {key: "B", text: "The ground-state wave function has a node at $x = L/2$"},
+                    {key: "C", text: "The probability density in the ground state is maximum at $x = L/2$"},
+                    {key: "D", text: "The zero-point energy is strictly non-zero due to Heisenberg's Uncertainty Principle"}
+                  ],
+                  correctAnswer: ["A", "C", "D"],
+                  detailedSolution: "1. Statement A is TRUE: Energy eigenvalues are $E_n = \\frac{n^2 \\pi^2 \\hbar^2}{2m L^2} \\propto n^2$.\n2. Statement B is FALSE: Ground state $\\psi_1(x) = \\sqrt{\\frac{2}{L}} \\sin\\left(\\frac{\\pi x}{L}\\right)$ has nodes only at walls ($x=0, L$), not at $x = L/2$.\n3. Statement C is TRUE: Probability density $P(x) = |\\psi_1(x)|^2 = \\frac{2}{L} \\sin^2\\left(\\frac{\\pi x}{L}\\right)$ reaches peak at $\\frac{\\pi x}{L} = \\frac{\\pi}{2} \\implies x = \\frac{L}{2}$.\n4. Statement D is TRUE: Confinement within $\\Delta x = L$ requires $\\Delta p > 0$, guaranteeing non-zero minimum kinetic energy $E_1 > 0$.\nCorrect options are A, C, D.",
+                  markingRubric: [
+                    "[+4 Marks] Selecting all three correct options: A, C, D",
+                    "[+1 Mark each] Partial credit for each correct option when no wrong option is selected",
+                    "[-2 Marks] Selecting option B"
+                  ],
+                  keyConcept: "1D Box Eigenstates: $\\psi_n(x) = \\sqrt{2/L}\\sin(n\\pi x/L)$"
+                }
+              ]
+            },
+            {
+              sectionTitle: "Section 3: Numerical / Integer Answer (+4, 0)",
+              sectionType: "numerical",
+              marksPerQuestion: 4,
+              negativeMarks: 0,
+              questions: [
+                {
+                  id: 203,
+                  questionNumber: "3",
+                  type: "numerical",
+                  typeLabel: "Numerical / Integer Type",
+                  marks: 4,
+                  negativeMarks: 0,
+                  passage: "",
+                  questionText: "Light of wavelength $\\lambda = 300\\text{ nm}$ falls on a photosensitive metal with work function $\\Phi = 2.14\\text{ eV}$. The stopping potential $V_0$ of the emitted photoelectrons is $k\\text{ Volts}$. Find the value of $k$ rounded to two decimal places. (Take $hc = 1240\\text{ eV}\\cdot\\text{nm}$).",
+                  options: [],
+                  correctAnswer: "1.99",
+                  detailedSolution: "Step 1: Calculate incident photon energy in electron-volts:\n$$E = \\frac{hc}{\\lambda} = \\frac{1240\\text{ eV}\\cdot\\text{nm}}{300\\text{ nm}} = 4.133\\text{ eV}$$\nStep 2: Apply Einstein's photoelectric equation:\n$$K_{\\max} = E - \\Phi = 4.133\\text{ eV} - 2.14\\text{ eV} = 1.993\\text{ eV}$$\nStep 3: Stopping potential relation:\n$$e V_0 = K_{\\max} \\implies V_0 = 1.99\\text{ V}$$\nAnswer: 1.99 (acceptable range: 1.98 to 2.00).",
+                  markingRubric: [
+                    "[+4 Marks] Answer in range 1.98 - 2.00",
+                    "[0 Marks] Any other answer or unattempted"
+                  ],
+                  keyConcept: "Stopping Potential: $V_0 = (hc/\\lambda - \\Phi)/e$"
+                }
+              ]
+            }
+          ]
+        };
+      }
+    }
+
+    /* ================= RENDER TEST PAPER ================= */
+    function renderTestPaper(paper) {
+      STATE.currentPaper = paper;
+      STATE.userAnswers = {};
+
+      const subject = STATE.currentDiscipline || '';
+      const subjectPrefix = (subject && subject !== 'General / Interdisciplinary') ? `[${subject}] ` : '';
+
+      // Fill formal header fields
+      document.getElementById('paperTitle').textContent = paper.testTitle || `${subjectPrefix}Comprehensive Q&A Paper`;
+      document.getElementById('paperTopic').textContent = `${subject && subject !== 'General / Interdisciplinary' ? subject + ' • ' : ''}${paper.topic || document.getElementById('topicInput').value}`;
+      document.getElementById('paperDuration').textContent = `${paper.estimatedTimeMinutes || 60} Minutes`;
+      document.getElementById('paperMarks').textContent = paper.totalMarks || calculateTotalMarks(paper);
+      document.getElementById('paperModeTag').textContent = paper.examMode === 'board' ? 'Academic / University' : 'Competitive / Professional';
+
+      // Fill instructions list
+      const instructionsList = document.getElementById('paperInstructionsList');
+      instructionsList.innerHTML = '';
+      const instructions = paper.generalInstructions || [
+        "Read each question carefully before attempting.",
+        "Ensure all derivations show complete mathematical steps.",
+        "Check all units in numerical calculations."
+      ];
+      instructions.forEach(inst => {
+        const li = document.createElement('li');
+        li.textContent = inst;
+        instructionsList.appendChild(li);
+      });
+
+      // Populate Section Filter Tabs
+      const filterTabsContainer = document.getElementById('sectionFilterTabs');
+      filterTabsContainer.innerHTML = '';
+      
+      const allBtn = document.createElement('button');
+      allBtn.className = 'px-2.5 py-1 rounded-lg font-bold text-[11px] transition bg-brand-600 text-white';
+      allBtn.textContent = 'All Sections';
+      allBtn.id = 'filterBtn_ALL';
+      allBtn.onclick = () => filterSectionDisplay('ALL');
+      filterTabsContainer.appendChild(allBtn);
+
+      (paper.sections || []).forEach((sec, idx) => {
+        const secBtn = document.createElement('button');
+        secBtn.className = 'px-2.5 py-1 rounded-lg font-bold text-[11px] transition bg-slate-100 hover:bg-slate-200 text-slate-700 whitespace-nowrap';
+        secBtn.textContent = `Sec ${String.fromCharCode(65 + idx)}`;
+        secBtn.id = `filterBtn_sec_${idx}`;
+        secBtn.onclick = () => filterSectionDisplay(idx);
+        filterTabsContainer.appendChild(secBtn);
+      });
+
+      // Render Questions Container
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = '';
+
+      let globalQuestionIndex = 1;
+
+      (paper.sections || []).forEach((section, sIdx) => {
+        // Section Container
+        const secDiv = document.createElement('div');
+        secDiv.className = 'section-block space-y-4';
+        secDiv.id = `section_container_${sIdx}`;
+
+        // Section Title Header
+        const secHeader = document.createElement('div');
+        secHeader.className = 'flex items-center justify-between py-2 border-b-2 border-slate-200 mt-6';
+        secHeader.innerHTML = `
+          <h3 class="font-extrabold text-base sm:text-lg text-slate-900 tracking-tight flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-brand-600"></span>
+            ${escapeHtml(section.sectionTitle || `Section ${sIdx + 1}`)}
+          </h3>
+          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+            ${section.marksPerQuestion ? `${section.marksPerQuestion} Marks each` : ''} 
+            ${section.negativeMarks ? `(-${section.negativeMarks} penalty)` : ''}
+          </span>
+        `;
+        secDiv.appendChild(secHeader);
+
+        // Section Questions
+        (section.questions || []).forEach((q) => {
+          const qCard = createQuestionCard(q, globalQuestionIndex++);
+          secDiv.appendChild(qCard);
+        });
+
+        container.appendChild(secDiv);
+      });
+
+      // Show results area & update view
+      const resultsSection = document.getElementById('resultsSection');
+      resultsSection.classList.remove('hidden');
+      updateViewDisplay();
+
+      // Trigger KaTeX rendering on math elements
+      setTimeout(() => {
+        initKaTeX();
+        lucide.createIcons();
+      }, 40);
+
+      // Scroll smoothly down to the results section after layout settles
+      setTimeout(() => {
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+
+    function filterSectionDisplay(secIdx) {
+      STATE.activeSectionFilter = secIdx;
+      
+      const allBtn = document.getElementById('filterBtn_ALL');
+      if (secIdx === 'ALL') {
+        allBtn.className = 'px-2.5 py-1 rounded-lg font-bold text-[11px] transition bg-brand-600 text-white';
+      } else {
+        allBtn.className = 'px-2.5 py-1 rounded-lg font-bold text-[11px] transition bg-slate-100 hover:bg-slate-200 text-slate-700';
+      }
+
+      (STATE.currentPaper?.sections || []).forEach((_, idx) => {
+        const btn = document.getElementById(`filterBtn_sec_${idx}`);
+        const cont = document.getElementById(`section_container_${idx}`);
+        if (!btn || !cont) return;
+
+        if (secIdx === 'ALL' || secIdx === idx) {
+          cont.classList.remove('hidden');
+          if (secIdx === idx) {
+            btn.className = 'px-2.5 py-1 rounded-lg font-bold text-[11px] transition bg-brand-600 text-white';
+          } else {
+            btn.className = 'px-2.5 py-1 rounded-lg font-bold text-[11px] transition bg-slate-100 hover:bg-slate-200 text-slate-700';
+          }
+        } else {
+          cont.classList.add('hidden');
+          btn.className = 'px-2.5 py-1 rounded-lg font-bold text-[11px] transition bg-slate-100 hover:bg-slate-200 text-slate-700';
+        }
+      });
+    }
+
+    function calculateTotalMarks(paper) {
+      let sum = 0;
+      (paper.sections || []).forEach(sec => {
+        (sec.questions || []).forEach(q => {
+          sum += (q.marks || sec.marksPerQuestion || 1);
+        });
+      });
+      return sum;
+    }
+
+    /* ================= CREATE QUESTION CARD ================= */
+    function createQuestionCard(q, displayIdx) {
+      const card = document.createElement('div');
+      card.className = 'question-card rounded-2xl p-5 sm:p-6 border border-[#ded88e] shadow-sm transition hover:border-[#cbc67e] text-slate-900';
+      card.style.backgroundColor = '#FDFBD6';
+      card.id = `qCard_${q.id || displayIdx}`;
+
+      // Card Header
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'flex items-center justify-between pb-3 mb-3 border-b border-slate-100';
+      headerDiv.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg bg-slate-900 text-white font-mono font-bold text-xs flex items-center justify-center">
+            Q${q.questionNumber || displayIdx}
+          </span>
+          <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-50 text-brand-700 border border-indigo-100">
+            ${escapeHtml(q.typeLabel || formatTypeLabel(q.type))}
+          </span>
+        </div>
+        <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+          <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">
+            +${q.marks || 1} ${q.marks === 1 ? 'Mark' : 'Marks'}
+          </span>
+          ${q.negativeMarks ? `<span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-100">-${q.negativeMarks}</span>` : ''}
+        </div>
+      `;
+      card.appendChild(headerDiv);
+
+      // Context Passage if applicable
+      if (q.passage && q.passage.trim().length > 0) {
+        const passageBox = document.createElement('div');
+        passageBox.className = 'p-3.5 mb-4 rounded-xl bg-[#FAF7C5] border-l-4 border-brand-600 text-xs text-slate-800 leading-relaxed';
+        passageBox.innerHTML = `
+          <div class="font-bold text-slate-900 uppercase tracking-wider text-[10px] mb-1 flex items-center gap-1">
+            <i data-lucide="file-text" class="w-3.5 h-3.5 text-brand-600"></i> Context / Reference Passage
+          </div>
+          <div>${renderLaTeX(q.passage)}</div>
+        `;
+        card.appendChild(passageBox);
+      }
+
+      // Assertion - Reasoning special box
+      if (q.assertion || q.reason) {
+        const arBox = document.createElement('div');
+        arBox.className = 'space-y-2 mb-4 p-3.5 rounded-xl bg-amber-50/50 border border-amber-200 text-xs';
+        arBox.innerHTML = `
+          <div class="font-semibold text-slate-900"><strong class="text-amber-700">Assertion (A):</strong> ${renderLaTeX(q.assertion || '')}</div>
+          <div class="font-semibold text-slate-900"><strong class="text-amber-700">Reason (R):</strong> ${renderLaTeX(q.reason || '')}</div>
+        `;
+        card.appendChild(arBox);
+      }
+
+      // Main Question Text
+      const textDiv = document.createElement('div');
+      textDiv.className = 'text-sm font-medium text-slate-900 mb-4 leading-relaxed whitespace-pre-line';
+      textDiv.innerHTML = renderLaTeX(q.questionText || '');
+      card.appendChild(textDiv);
+
+      // Matrix Match Special Table
+      if (q.columnA && q.columnB && q.columnA.length > 0) {
+        const matchTable = document.createElement('div');
+        matchTable.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs';
+        
+        let colAHtml = '<div class="space-y-2"><div class="font-bold text-slate-800 uppercase text-[10px]">Column I</div>';
+        q.columnA.forEach(item => {
+          colAHtml += `<div class="p-2 bg-white rounded-lg border border-slate-200 font-medium"><strong>(${item.key})</strong> ${renderLaTeX(item.text)}</div>`;
+        });
+        colAHtml += '</div>';
+
+        let colBHtml = '<div class="space-y-2"><div class="font-bold text-slate-800 uppercase text-[10px]">Column II</div>';
+        q.columnB.forEach(item => {
+          colBHtml += `<div class="p-2 bg-white rounded-lg border border-slate-200 font-medium"><strong>(${item.key})</strong> ${renderLaTeX(item.text)}</div>`;
+        });
+        colBHtml += '</div>';
+
+        matchTable.innerHTML = colAHtml + colBHtml;
+        card.appendChild(matchTable);
+      }
+
+      // Interactive Options (for MCQs)
+      if (q.options && q.options.length > 0) {
+        const optionsContainer = document.createElement('div');
+        optionsContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4';
+        
+        const isMulti = q.type === 'mcq_multi' || Array.isArray(q.correctAnswer);
+
+        q.options.forEach((opt) => {
+          const optLabel = document.createElement('label');
+          optLabel.className = 'cursor-pointer flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 hover:border-brand-400 bg-white hover:bg-slate-50/50 transition text-xs font-medium text-slate-800';
+          
+          const inputType = isMulti ? 'checkbox' : 'radio';
+          const inputName = `q_opt_${q.id || displayIdx}`;
+
+          optLabel.innerHTML = `
+            <input type="${inputType}" name="${inputName}" value="${opt.key}" 
+                   onchange="handleOptionSelect('${q.id || displayIdx}', '${opt.key}', ${isMulti})" 
+                   class="mt-0.5 accent-brand-600">
+            <div class="flex-1">
+              <span class="font-bold text-slate-900 mr-1.5">(${opt.key})</span>
+              <span>${renderLaTeX(opt.text)}</span>
+            </div>
+          `;
+          optionsContainer.appendChild(optLabel);
+        });
+
+        card.appendChild(optionsContainer);
+
+        // Practice Mode Toolbar
+        const practiceBar = document.createElement('div');
+        practiceBar.className = 'no-print flex items-center justify-between text-xs py-2 border-t border-slate-100';
+        practiceBar.innerHTML = `
+          <button onclick="checkAnswer('${q.id || displayIdx}')" class="interactive-btn px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition active:scale-95 flex items-center gap-1.5">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i> Check Answer
+          </button>
+          <span id="feedback_${q.id || displayIdx}" class="font-semibold text-xs"></span>
+        `;
+        card.appendChild(practiceBar);
+      } else if (q.type === 'numerical') {
+        // Numerical Input Practice Box
+        const numContainer = document.createElement('div');
+        numContainer.className = 'no-print mb-4 flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs';
+        numContainer.innerHTML = `
+          <span class="font-bold text-slate-700">Enter Value:</span>
+          <input type="number" step="any" id="numInput_${q.id || displayIdx}" placeholder="e.g. 1.99" 
+                 class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-mono w-32 focus:border-brand-500">
+          <button onclick="checkNumericalAnswer('${q.id || displayIdx}')" class="interactive-btn px-3 py-1.5 rounded-lg bg-brand-600 text-white font-semibold hover:bg-brand-500 transition">
+            Verify
+          </button>
+          <span id="feedback_${q.id || displayIdx}" class="font-semibold text-xs ml-2"></span>
+        `;
+        card.appendChild(numContainer);
+      }
+
+      // Detailed Solution & Step-by-Step Marking Rubric (Expandable Accordion)
+      const solutionAccordion = document.createElement('div');
+      solutionAccordion.className = 'solution-block mt-4 border-t border-slate-200 pt-3';
+      solutionAccordion.id = `solAccordion_${q.id || displayIdx}`;
+
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'no-print w-full flex items-center justify-between text-xs font-bold text-brand-700 py-1 hover:text-brand-800 transition';
+      toggleBtn.onclick = () => toggleSingleSolution(q.id || displayIdx);
+      toggleBtn.innerHTML = `
+        <span class="flex items-center gap-1.5">
+          <i data-lucide="file-check-2" class="w-4 h-4"></i>
+          <span>Solution & Marking Rubric</span>
+        </span>
+        <i data-lucide="chevron-down" id="chevron_${q.id || displayIdx}" class="w-4 h-4 transform transition-transform"></i>
+      `;
+      solutionAccordion.appendChild(toggleBtn);
+
+      const solBody = document.createElement('div');
+      solBody.id = `solBody_${q.id || displayIdx}`;
+      solBody.className = 'solution-content mt-3 space-y-3';
+
+      let answerFormatted = '';
+      if (Array.isArray(q.correctAnswer)) {
+        answerFormatted = q.correctAnswer.join(', ');
+      } else {
+        answerFormatted = q.correctAnswer || 'Subjective / Derivation';
+      }
+
+      solBody.innerHTML = `
+        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs">
+          <div class="font-bold text-emerald-900 mb-0.5 flex items-center gap-1">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i> Correct Answer / Reference Key:
+          </div>
+          <div class="font-mono font-bold text-emerald-800 text-sm">${escapeHtml(answerFormatted)}</div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800">
+          <div class="font-bold text-slate-900 uppercase tracking-wider text-[10px] mb-1.5 flex items-center gap-1">
+            <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-500"></i> Step-by-Step Derivation & Explanation:
+          </div>
+          <div class="leading-relaxed whitespace-pre-line text-slate-700">${renderLaTeX(q.detailedSolution || 'Refer to standard derivation.')}</div>
+        </div>
+
+        ${q.markingRubric && q.markingRubric.length > 0 ? `
+          <div class="p-3 rounded-xl bg-indigo-50/60 border border-indigo-100 text-xs text-slate-700">
+            <div class="font-bold text-brand-900 uppercase tracking-wider text-[10px] mb-1 flex items-center gap-1">
+              <i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-brand-600"></i> Step-Wise Marking Rubric:
+            </div>
+            <ul class="list-disc list-inside space-y-1 text-slate-700">
+              ${q.markingRubric.map(r => `<li>${renderLaTeX(r)}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+
+        ${q.keyConcept ? `
+          <div class="text-[11px] text-slate-500 italic flex items-center gap-1">
+            <i data-lucide="tag" class="w-3 h-3 text-slate-400"></i>
+            <span>Pedagogical Principle: ${escapeHtml(q.keyConcept)}</span>
+          </div>
+        ` : ''}
+      `;
+
+      solutionAccordion.appendChild(solBody);
+      card.appendChild(solutionAccordion);
+
+      return card;
+    }
+
+    function formatTypeLabel(type) {
+      const map = {
+        'mcq_single': 'Single Correct MCQ',
+        'mcq_multi': 'Multiple Correct MCQ',
+        'vsa': 'Very Short Answer (2M)',
+        'sa': 'Short Answer (3M)',
+        'la': 'Long Answer (5M)',
+        'case_based': 'Case-Based / Competency Study',
+        'numerical': 'Numerical / Integer Type',
+        'assertion_reason': 'Assertion - Reasoning',
+        'matrix_match': 'Matrix Match (Columns)',
+        'comprehension': 'Paragraph Comprehension'
+      };
+      return map[type] || 'Standard Question';
+    }
+
+    /* ================= INTERACTIVE PRACTICE & ANSWER CHECKING ================= */
+    function handleOptionSelect(qId, key, isMulti) {
+      if (isMulti) {
+        if (!Array.isArray(STATE.userAnswers[qId])) {
+          STATE.userAnswers[qId] = [];
+        }
+        const idx = STATE.userAnswers[qId].indexOf(key);
+        if (idx > -1) {
+          STATE.userAnswers[qId].splice(idx, 1);
+        } else {
+          STATE.userAnswers[qId].push(key);
+          STATE.userAnswers[qId].sort();
+        }
+      } else {
+        STATE.userAnswers[qId] = key;
+      }
+    }
+
+    function checkAnswer(qId) {
+      if (!STATE.currentPaper) return;
+      let questionObj = null;
+      (STATE.currentPaper.sections || []).forEach(sec => {
+        (sec.questions || []).forEach(q => {
+          if (String(q.id) === String(qId)) questionObj = q;
+        });
+      });
+
+      if (!questionObj) return;
+
+      const userAns = STATE.userAnswers[qId];
+      const feedbackEl = document.getElementById(`feedback_${qId}`);
+      if (!feedbackEl) return;
+
+      if (!userAns || (Array.isArray(userAns) && userAns.length === 0)) {
+        feedbackEl.textContent = 'Please choose an option first!';
+        feedbackEl.className = 'font-semibold text-xs text-amber-600';
+        return;
+      }
+
+      let isCorrect = false;
+      if (Array.isArray(questionObj.correctAnswer)) {
+        const sortedExpected = [...questionObj.correctAnswer].sort().join(',');
+        const sortedUser = Array.isArray(userAns) ? [...userAns].sort().join(',') : userAns;
+        isCorrect = sortedExpected === sortedUser;
+      } else {
+        isCorrect = String(userAns).trim().toUpperCase() === String(questionObj.correctAnswer).trim().toUpperCase();
+      }
+
+      if (isCorrect) {
+        feedbackEl.innerHTML = `<span class="text-emerald-600 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Correct! Excellent.</span>`;
+      } else {
+        feedbackEl.innerHTML = `<span class="text-rose-600 flex items-center gap-1"><i data-lucide="x" class="w-3.5 h-3.5"></i> Incorrect. Review the detailed rubric below.</span>`;
+        revealSolution(qId, true);
+      }
+      lucide.createIcons();
+    }
+
+    function checkNumericalAnswer(qId) {
+      if (!STATE.currentPaper) return;
+      let questionObj = null;
+      (STATE.currentPaper.sections || []).forEach(sec => {
+        (sec.questions || []).forEach(q => {
+          if (String(q.id) === String(qId)) questionObj = q;
+        });
+      });
+
+      if (!questionObj) return;
+
+      const inputVal = document.getElementById(`numInput_${qId}`).value.trim();
+      const feedbackEl = document.getElementById(`feedback_${qId}`);
+      if (!feedbackEl) return;
+
+      if (!inputVal) {
+        feedbackEl.textContent = 'Enter a value first!';
+        feedbackEl.className = 'font-semibold text-xs text-amber-600';
+        return;
+      }
+
+      const userNum = parseFloat(inputVal);
+      const expectedNum = parseFloat(questionObj.correctAnswer);
+
+      const isCorrect = Math.abs(userNum - expectedNum) <= 0.05 * Math.abs(expectedNum) || Math.abs(userNum - expectedNum) <= 0.05;
+
+      if (isCorrect) {
+        feedbackEl.innerHTML = `<span class="text-emerald-600 flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Correct (${expectedNum})</span>`;
+      } else {
+        feedbackEl.innerHTML = `<span class="text-rose-600 flex items-center gap-1"><i data-lucide="x" class="w-3.5 h-3.5"></i> Expected: ${expectedNum}</span>`;
+        revealSolution(qId, true);
+      }
+      lucide.createIcons();
+    }
+
+    /* ================= SOLUTION EXPANSION & VIEW MODES ================= */
+    function setViewMode(mode) {
+      STATE.viewMode = mode;
+      
+      const btnStudent = document.getElementById('viewBtnStudent');
+      const btnTeacher = document.getElementById('viewBtnTeacher');
+
+      if (mode === 'student') {
+        btnStudent.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-800 shadow-sm';
+        btnTeacher.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+        toggleAllSolutions(false);
+      } else {
+        btnTeacher.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-800 shadow-sm';
+        btnStudent.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+        toggleAllSolutions(true);
+      }
+    }
+
+    function updateViewDisplay() {
+      setViewMode(STATE.viewMode);
+    }
+
+    function toggleSingleSolution(qId) {
+      const body = document.getElementById(`solBody_${qId}`);
+      if (!body) return;
+      const isHidden = body.classList.contains('hidden');
+      revealSolution(qId, isHidden);
+    }
+
+    function revealSolution(qId, show) {
+      const body = document.getElementById(`solBody_${qId}`);
+      const chevron = document.getElementById(`chevron_${qId}`);
+      if (!body) return;
+
+      if (show) {
+        body.classList.remove('hidden');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+      } else {
+        body.classList.add('hidden');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function toggleAllSolutions(forceState) {
+      const newState = typeof forceState === 'boolean' ? forceState : !STATE.allSolutionsVisible;
+      STATE.allSolutionsVisible = newState;
+
+      const allBodies = document.querySelectorAll('.solution-content');
+      allBodies.forEach(b => {
+        if (newState) b.classList.remove('hidden');
+        else b.classList.add('hidden');
+      });
+
+      const label = document.getElementById('masterSolutionLabel');
+      const icon = document.getElementById('masterSolutionIcon');
+      if (label) label.textContent = newState ? 'Hide All Solutions' : 'Show All Solutions';
+      if (icon) icon.setAttribute('data-lucide', newState ? 'eye-off' : 'eye');
+
+      lucide.createIcons();
+    }
+
+    /* ================= EXPORT UTILITIES ================= */
+    function exportMarkdown() {
+      if (!STATE.currentPaper) {
+        showToast('No assessment generated yet!');
+        return;
+      }
+
+      const p = STATE.currentPaper;
+      const subject = STATE.currentDiscipline || '';
+      let md = `# ${p.testTitle || 'Any Topic Q&A Paper'}\n\n`;
+      if (subject && subject !== 'General / Interdisciplinary') {
+        md += `**Discipline / Field:** ${subject}\n`;
+      }
+      md += `**Subject / Topic:** ${p.topic || 'General'}\n`;
+      md += `**Target Standard:** ${p.targetLevel || 'Universal'}\n`;
+      md += `**Exam Format:** ${p.examMode === 'board' ? 'Academic / University Mode' : 'Competitive / Professional Mode'}\n`;
+      md += `**Time Allowed:** ${p.estimatedTimeMinutes || 60} Minutes\n`;
+      md += `**Maximum Marks:** ${p.totalMarks || calculateTotalMarks(p)}\n\n`;
+
+      md += `## General Instructions\n`;
+      (p.generalInstructions || []).forEach((inst, i) => {
+        md += `${i + 1}. ${inst}\n`;
+      });
+      md += `\n---\n\n`;
+
+      let qCounter = 1;
+      (p.sections || []).forEach(sec => {
+        md += `## ${sec.sectionTitle}\n\n`;
+        (sec.questions || []).forEach(q => {
+          md += `### Q${q.questionNumber || qCounter++} (${q.typeLabel || 'Question'}) [${q.marks} Marks]\n\n`;
+          if (q.passage) {
+            md += `> **Context / Passage:**\n> ${q.passage.replace(/\n/g, '\n> ')}\n\n`;
+          }
+          if (q.assertion || q.reason) {
+            md += `* **Assertion (A):** ${q.assertion}\n`;
+            md += `* **Reason (R):** ${q.reason}\n\n`;
+          }
+          md += `${q.questionText}\n\n`;
+
+          if (q.columnA && q.columnB) {
+            md += `| Column I | Column II |\n| :--- | :--- |\n`;
+            for (let i = 0; i < Math.max(q.columnA.length, q.columnB.length); i++) {
+              const itemA = q.columnA[i] ? `(${q.columnA[i].key}) ${q.columnA[i].text}` : '';
+              const itemB = q.columnB[i] ? `(${q.columnB[i].key}) ${q.columnB[i].text}` : '';
+              md += `| ${itemA} | ${itemB} |\n`;
+            }
+            md += `\n`;
+          }
+
+          if (q.options && q.options.length > 0) {
+            q.options.forEach(opt => {
+              md += `- **(${opt.key})** ${opt.text}\n`;
+            });
+            md += `\n`;
+          }
+
+          md += `<details>\n<summary><b>View Solution & Marking Rubric</b></summary>\n\n`;
+          md += `**Correct Answer:** \`${Array.isArray(q.correctAnswer) ? q.correctAnswer.join(', ') : q.correctAnswer}\`\n\n`;
+          md += `**Detailed Explanation:**\n${q.detailedSolution}\n\n`;
+          if (q.markingRubric && q.markingRubric.length > 0) {
+            md += `**Marking Rubric:**\n`;
+            q.markingRubric.forEach(r => md += `- ${r}\n`);
+            md += `\n`;
+          }
+          md += `</details>\n\n---\n\n`;
+        });
+      });
+
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeTitle = (p.topic || 'Assessment').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      a.href = url;
+      a.download = `${safeTitle}_qna_paper.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Downloaded Markdown Q&A file!');
+    }
+
+    function triggerPrint() {
+      if (!STATE.currentPaper) {
+        showToast('Generate an assessment before printing!');
+        return;
+      }
+      window.print();
+    }
+
+    function copyTestToClipboard() {
+      if (!STATE.currentPaper) {
+        showToast('No assessment to copy!');
+        return;
+      }
+      
+      const paperElement = document.getElementById('testPaperContainer');
+      const textToCopy = paperElement.innerText;
+      
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast('Assessment copied to clipboard!');
+      }).catch(err => {
+        console.error('Copy failed:', err);
+        showToast('Unable to copy to clipboard.');
+      });
+    }
+
+    /* ================= HELPER & UI UTILITIES ================= */
+    function setGeneratingUI(isGenerating) {
+      const generateBtn = document.getElementById('generateBtn');
+      const topBtn = document.getElementById('searchBarGenerateBtn');
+      const rerollBottom = document.getElementById('rerollBtnBottom');
+      const rerollToolbar = document.getElementById('rerollBtnToolbar');
+      const topicInput = document.getElementById('topicInput');
+
+      if (generateBtn) {
+        generateBtn.disabled = isGenerating;
+        if (isGenerating) {
+          generateBtn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Generating Q&A with Gemini 3.8 Flash...</span>`;
+          generateBtn.classList.add('opacity-80', 'cursor-wait');
+        } else {
+          generateBtn.innerHTML = `<i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i><span>Generate Q&A</span>`;
+          generateBtn.classList.remove('opacity-80', 'cursor-wait');
+        }
+      }
+
+      if (topBtn) {
+        topBtn.disabled = isGenerating;
+      }
+      if (rerollBottom) rerollBottom.disabled = isGenerating;
+      if (rerollToolbar) rerollToolbar.disabled = isGenerating;
+      if (topicInput) topicInput.disabled = isGenerating;
+
+      lucide.createIcons();
+    }
+
+    function showLoading(show) {
+      const overlay = document.getElementById('loadingOverlay');
+      if (show) {
+        overlay.classList.remove('hidden');
+        // Smoothly scroll down so user immediately sees progression
+        setTimeout(() => {
+          overlay.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 10);
+      } else {
+        overlay.classList.add('hidden');
+      }
+      setGeneratingUI(show);
+    }
+
+    function updateLoadingStep(stepNum, stepText) {
+      document.getElementById('loadingSubText').textContent = stepText;
+      for (let i = 1; i <= 4; i++) {
+        const stepEl = document.getElementById(`step${i}`);
+        if (!stepEl) continue;
+        if (i < stepNum) {
+          stepEl.className = 'flex items-center gap-2 text-emerald-600 font-medium';
+          stepEl.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> <span>Step ${i} Complete</span>`;
+        } else if (i === stepNum) {
+          stepEl.className = 'flex items-center gap-2 text-brand-600 font-bold';
+          stepEl.innerHTML = `<i data-lucide="circle-dashed" class="w-4 h-4 animate-spin"></i> <span>${stepText}</span>`;
+        } else {
+          stepEl.className = 'flex items-center gap-2 text-slate-400';
+          stepEl.innerHTML = `<i data-lucide="circle" class="w-4 h-4"></i> <span>Pending Step ${i}</span>`;
+        }
+      }
+      lucide.createIcons();
+    }
+
+    function showError(title, message) {
+      const banner = document.getElementById('errorBanner');
+      document.getElementById('errorTitle').textContent = title;
+      document.getElementById('errorMessage').textContent = message;
+      banner.classList.remove('hidden');
+      banner.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function hideError() {
+      document.getElementById('errorBanner').classList.add('hidden');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      toastMsg.textContent = message;
+      toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+
+    function renderLaTeX(raw) {
+      if (!raw) return '';
+      return escapeHtml(raw);
+    }
+
+    function escapeHtml(string) {
+      if (!string) return '';
+      return String(string)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
