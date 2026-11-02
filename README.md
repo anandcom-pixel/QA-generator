@@ -10,9 +10,12 @@
 A single, cohesive, card-based panel right at the top styled in clean cream (`#FDFBD6`) with high-contrast dark slate/charcoal typography (`#1e293b` / `#0f172a`):
 - **Step 1: Enter Any Topic**: Enter any chapter, topic, semester, or concept directly. Includes search icon, clear button, and keyboard `Enter` listener for rapid generation without extra menus.
 - **Step 2: Choose Discipline / Field**: Includes built-in disciplines, quick interactive pills, and an inline **Add Custom Subject** form with delete (`x`) capability persisted in `localStorage`.
+- **Exam Architecture Format Cards**: Prominent dual cards positioned directly above target level & difficulty:
+  - **Option 1: School / Board Exam Mode** (CBSE, ICSE / ISC, State Boards, University / B.Tech) with structured step rubrics (1M, 2M, 3M, 5M, Case passages) and no negative penalties.
+  - **Option 2: Competitive / Entrance Exam Mode** (JEE Main & Adv, NEET-UG, GATE, CAT / MBA, UPSC / Certs) with negative marking (+4, -1), multiple correct, numerical, and matrix match formats.
 - **Step 3: Select Target Standard / Level**: Select from organized `<optgroup>`s covering Engineering Semesters 1–8, School Boards (Class 9–12), Competitive Exams (JEE, NEET, GATE, CAT, UPSC), Professional Tech Certifications (AWS, LeetCode, PMP, CFA), and University degrees.
 - **Step 4: Select Difficulty Level**: Choose from *Foundational / Beginner, Moderate, Balanced (Recommended), Challenging / HOTS, Extreme / Olympiad / GATE*.
-- **Optional Format & Blueprint Drawer**: Toggleable advanced settings for Exam Mode Architecture (Academic vs. Competitive), Exam Duration, and Category Distribution Sliders with live question and marks tallies.
+- **Optional Advanced Blueprint Drawer**: Collapsible fine-tuning drawer for per-category question counts, section weights, and exam duration.
 
 ### 2. Clean, Uncluttered Workflow (Presets Menu Removed)
 - Redundant preset menus and drawers have been removed from the header to keep the interface strictly focused on the sequential 4-step workflow.
