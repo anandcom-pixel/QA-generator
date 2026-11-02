@@ -52,16 +52,17 @@ A single, cohesive, card-based panel right at the top styled in clean cream (`#F
   - "Print / Save as PDF" via clean `@media print` styling without website buttons or clutter.
   - "Copy to Clipboard" with toast confirmation.
 
----
-
-## 🚀 How to Run
-
-1. Open [`index.html`](file:///C:/Users/USER/.gemini/antigravity/scratch/universal-qa-generator/index.html) directly in any modern web browser.
-2. Or start a local static server:
-   ```powershell
-   python -m http.server 8000 --directory C:\Users\USER\.gemini\antigravity\scratch\universal-qa-generator
-   ```
-3. Set [`C:\Users\USER\.gemini\antigravity\scratch\universal-qa-generator`](file:///C:/Users/USER/.gemini/antigravity/scratch/universal-qa-generator) as your active workspace for future work.
+### 5. Multi-Model AI Routing (Google Gemini & Groq Cloud)
+- **Footer Model Switcher**: Seamlessly switch between:
+  - **Google Gemini 3.8 Flash** (`gemini-3.8-flash`) — Google's high-speed multimodal reasoning model.
+  - **Groq GPT-OSS 20B** (`openai/gpt-oss-20b`) / **Qwen 3.8 27B** (`qwen/qwen3.8-27b`) — Ultra-low-latency Groq LPU inference.
+- **Dynamic API Routing**:
+  - Gemini queries dispatch to `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}` with native JSON mode.
+  - Groq queries dispatch to `https://api.groq.com/openai/v1/chat/completions` with Bearer auth, active model string (`openai/gpt-oss-20b` or `qwen/qwen3.8-27b`), and `response_format: {"type": "json_object"}`.
+- **Provider-Aware Key Management**:
+  - Automatically prompts users for their Groq key when switching to Groq if no key is stored.
+  - Stored strictly in browser `localStorage` (`omniassess_gemini_api_key` and `omniassess_groq_api_key`) and model choice persisted across sessions.
+  - Quick links to both [Google AI Studio](https://aistudio.google.com/app/apikey) and [Groq Console](https://console.groq.com/keys).
 
 ---
 
