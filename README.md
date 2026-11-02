@@ -15,7 +15,11 @@ A single, cohesive, card-based panel right at the top styled in clean cream (`#F
   - **Option 2: Competitive / Entrance Exam Mode** (JEE Main & Adv, NEET-UG, GATE, CAT / MBA, UPSC / Certs) with negative marking (+4, -1), multiple correct, numerical, and matrix match formats.
 - **Step 3: Select Target Standard / Level**: Select from organized `<optgroup>`s covering Engineering Semesters 1–8, School Boards (Class 9–12), Competitive Exams (JEE, NEET, GATE, CAT, UPSC), Professional Tech Certifications (AWS, LeetCode, PMP, CFA), and University degrees.
 - **Step 4: Select Difficulty Level**: Choose from *Foundational / Beginner, Moderate, Balanced (Recommended), Challenging / HOTS, Extreme / Olympiad / GATE*.
-- **Optional Advanced Blueprint Drawer**: Collapsible fine-tuning drawer for per-category question counts, section weights, and exam duration.
+- **Question Category Distribution Blueprint (20–25 Questions Full Assessment)**:
+  - Complete fine-tuning grid for both exam modes with live interactive range sliders and increment/decrement (`+` / `-`) buttons.
+  - Defaults to **24 questions total** (e.g., 10 MCQs, 5 VSA, 4 SA, 3 LA, 2 Case/Numerical for Board Mode; 10 Single Correct, 4 Multiple Correct, 4 Numerical, 3 Assertion-Reason, 2 Matrix Match, 1 Passage for Competitive Mode).
+  - Real-time tally badges dynamically updating total questions and maximum marks.
+  - Strict system prompt payload synchronization passing exact section breakdown and question volumes to active AI models.
 
 ### 2. Clean, Uncluttered Workflow (Presets Menu Removed)
 - Redundant preset menus and drawers have been removed from the header to keep the interface strictly focused on the sequential 4-step workflow.

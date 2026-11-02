@@ -429,31 +429,38 @@
 
           </div>
 
-          <!-- ================= OPTIONAL ADVANCED BLUEPRINT DRAWER ================= -->
+          <!-- ================= QUESTION CATEGORY DISTRIBUTION & BLUEPRINT SLIDERS ================= -->
           <div style="background-color: #FDFBD6;" class="border border-[#ded88e] rounded-2xl overflow-hidden shadow-xs">
             <button type="button" onclick="toggleBlueprintDrawer()" 
-                    class="w-full p-4 flex items-center justify-between text-left hover:bg-[#FAF7C5] transition cursor-pointer">
-              <div class="flex items-center gap-2.5">
-                <i data-lucide="sliders" class="w-4 h-4 text-brand-600"></i>
+                    class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-white/40 transition cursor-pointer">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-2xs">
+                  <i data-lucide="sliders" class="w-4 h-4"></i>
+                </span>
                 <div>
-                  <span class="text-xs sm:text-sm font-bold text-slate-900 block">
-                    Optional: Advanced Question Category Sliders & Duration
-                  </span>
-                  <span class="text-[11px] text-slate-600">
-                    Fine-tune question counts per question type, section weights, and exam duration
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs sm:text-sm font-extrabold text-slate-900 block">
+                      Question Category Distribution Blueprint
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-brand-100 text-brand-800 border border-brand-300">
+                      20–25 Qs Full Paper
+                    </span>
+                  </div>
+                  <span class="text-[11px] text-slate-600 font-medium">
+                    Fine-tune exact question counts per category, marks weightage, and exam duration
                   </span>
                 </div>
               </div>
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-800 border border-brand-200 font-mono font-bold hidden sm:inline">
-                  <span id="totalQuestionsBadge">12</span> Qs • <span id="totalMarksBadge">35</span> Marks
+              <div class="flex items-center gap-2 sm:gap-3">
+                <span class="px-3 py-1 rounded-xl bg-white border border-[#ded88e] text-xs font-mono font-extrabold text-slate-900 shadow-2xs">
+                  <span id="totalQuestionsBadge">24</span> Qs • <span id="totalMarksBadge">55</span> Marks
                 </span>
-                <i data-lucide="chevron-down" id="blueprintDrawerIcon" class="w-4 h-4 text-slate-600 transition-transform duration-200"></i>
+                <i data-lucide="chevron-down" id="blueprintDrawerIcon" class="w-4 h-4 text-slate-600 transition-transform duration-200 rotate-180"></i>
               </div>
             </button>
 
-            <!-- Collapsed Blueprint Content -->
-            <div id="advancedBlueprintDrawer" class="hidden p-5 border-t border-[#ded88e] space-y-5 bg-[#FAF7C5]/60">
+            <!-- Expanded Blueprint Content (Open by default so fine-tuning grid is immediately available) -->
+            <div id="advancedBlueprintDrawer" class="p-4 sm:p-5 border-t border-[#ded88e] space-y-5 bg-[#FAF7C5]/60">
               
               <!-- Suggested Exam Duration -->
               <div style="background-color: #FDFBD6;" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-[#ded88e] text-slate-900 shadow-2xs">
@@ -462,214 +469,224 @@
                   <span>Suggested Exam Duration:</span>
                 </label>
                 <select id="durationSelect" 
-                        class="px-3 py-1.5 rounded-xl bg-white text-slate-900 border border-slate-300 text-xs font-medium focus:border-brand-600 outline-none shadow-xs">
+                        class="px-3 py-1.5 rounded-xl bg-white text-slate-900 border border-slate-300 text-xs font-medium focus:border-brand-600 outline-none shadow-xs cursor-pointer">
                   <option value="Auto-Calculate based on questions">Auto-Calculate based on questions</option>
                   <option value="30 Minutes (Quick Quiz)">30 Minutes (Quick Quiz)</option>
-                  <option value="60 Minutes (Standard Class Test)" selected>60 Minutes (Standard Class Test)</option>
-                  <option value="90 Minutes (Mid-Term Assessment)">90 Minutes (Mid-Term Assessment)</option>
+                  <option value="60 Minutes (Standard Class Test)">60 Minutes (Standard Class Test)</option>
+                  <option value="90 Minutes (Mid-Term Assessment)" selected>90 Minutes (Mid-Term Assessment)</option>
                   <option value="180 Minutes (Full Length Mock)">180 Minutes (Full Length Mock)</option>
                 </select>
               </div>
 
-              <!-- Section Title Header for Sliders -->
-              <div class="flex items-center justify-between pt-2">
-                <span id="blueprintSectionTitle" class="text-xs font-bold uppercase tracking-wider text-slate-900">
-                  Question Category Distribution
-                </span>
-                <button type="button" onclick="resetAll()" class="text-[11px] text-slate-600 hover:text-slate-900 underline cursor-pointer">
-                  Reset counts to default
-                </button>
+              <!-- Section Title Header for Sliders with Live Summary Badge -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-b border-[#ded88e]/60 pb-3">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span id="blueprintSectionTitle" class="text-xs font-extrabold uppercase tracking-wider text-slate-900">
+                    School / Board Exam Category Distribution
+                  </span>
+                  <span id="blueprintSummaryBadge" class="text-[11px] font-mono font-bold text-brand-800 bg-brand-100/90 border border-brand-200 px-2 py-0.5 rounded-md shadow-2xs">
+                    24 Questions • 55 Marks
+                  </span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-[11px] text-slate-600 hidden md:inline">Drag sliders or use + / - to customize</span>
+                  <button type="button" onclick="resetAll()" class="text-[11px] text-brand-700 hover:text-brand-900 font-bold underline cursor-pointer">
+                    Reset counts to default
+                  </button>
+                </div>
               </div>
 
-              <!-- Mode A Categories (Academic / Board / University Format) -->
+              <!-- Mode A Categories (School / Board / University Format) -->
               <div id="boardCategoriesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                
                 <!-- Category 1: MCQs -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-brand-800 border border-brand-200">1 Mark</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Objective / MCQs</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-indigo-100 text-brand-800 border border-brand-200">1 Mark Each</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Objective / MCQs</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="board_mcq_val">5</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="board_mcq_val">10</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">Single-option conceptual check</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('board_mcq', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="board_mcq" min="0" max="15" value="5" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('board_mcq', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">Single-option conceptual check & multiple choice</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('board_mcq', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="board_mcq" min="0" max="30" value="10" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('board_mcq', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
 
                 <!-- Category 2: VSA -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-brand-800 border border-brand-200">2 Marks</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Very Short Answer (VSA)</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-indigo-100 text-brand-800 border border-brand-200">2 Marks Each</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Very Short Answer (VSA)</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="board_vsa_val">3</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="board_vsa_val">5</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">1-2 sentences or direct formula</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('board_vsa', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="board_vsa" min="0" max="10" value="3" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('board_vsa', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">1-2 sentences, key definitions, or direct formulas</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('board_vsa', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="board_vsa" min="0" max="20" value="5" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('board_vsa', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
 
                 <!-- Category 3: Short Answer -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-brand-800 border border-brand-200">3 Marks</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Short Answer (SA)</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-indigo-100 text-brand-800 border border-brand-200">3 Marks Each</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Short Answer (SA)</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="board_sa_val">2</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="board_sa_val">4</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">Structured derivation or proof</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('board_sa', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="board_sa" min="0" max="8" value="2" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('board_sa', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">Structured derivations, analytical steps, or proofs</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('board_sa', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="board_sa" min="0" max="15" value="4" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('board_sa', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
 
                 <!-- Category 4: Long Answer -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-brand-800 border border-brand-200">5 Marks</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Long Answer (LA)</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-indigo-100 text-brand-800 border border-brand-200">5 Marks Each</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Long Answer (LA)</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="board_la_val">1</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="board_la_val">3</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">Comprehensive in-depth synthesis</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('board_la', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="board_la" min="0" max="5" value="1" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('board_la', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">Comprehensive in-depth synthesis & multi-part answers</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('board_la', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="board_la" min="0" max="10" value="3" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('board_la', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
 
-                <!-- Category 5: Case-Based -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs sm:col-span-2 lg:col-span-2">
+                <!-- Category 5: Case-Based / Numerical Problems -->
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs sm:col-span-2 lg:col-span-2">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-brand-800 border border-brand-200">4 Marks</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Case-Based / Competency Passage</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-indigo-100 text-brand-800 border border-brand-200">4 Marks Each</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Case-Based / Numerical Problems</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="board_case_val">1</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="board_case_val">2</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">Real-world scenario with linked sub-questions</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('board_case', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="board_case" min="0" max="3" value="1" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('board_case', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">Real-world context passage, data-driven or numerical problem with sub-questions</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('board_case', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="board_case" min="0" max="8" value="2" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('board_case', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
               </div>
 
               <!-- Mode B Categories (Competitive / Professional Format) -->
               <div id="competitiveCategoriesContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                
                 <!-- Comp 1: Single Correct -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">+4, -1</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Single Correct MCQs</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-emerald-100 text-emerald-800 border border-emerald-200">+4, -1 Penalty</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Single Correct MCQs</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_sc_val">4</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="comp_sc_val">10</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">Standard 4-option single correct</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('comp_sc', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="comp_sc" min="0" max="15" value="4" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('comp_sc', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">Standard 4-option single correct with negative penalty</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('comp_sc', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="comp_sc" min="0" max="30" value="10" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_sc', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
 
                 <!-- Comp 2: Multiple Correct -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">Partial Mark</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Multiple Correct MCQs</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-amber-100 text-amber-800 border border-amber-200">+4, Partial Mark</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Multiple Correct MCQs</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_mc_val">2</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="comp_mc_val">4</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">Advanced 1 or more options correct</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('comp_mc', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="comp_mc" min="0" max="10" value="2" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('comp_mc', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">Advanced 1 or more options correct with partial scoring</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('comp_mc', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="comp_mc" min="0" max="15" value="4" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_mc', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
 
                 <!-- Comp 3: Numerical -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200">+4, 0</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Numerical / Integer Type</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-sky-100 text-sky-800 border border-sky-200">+4, 0 Penalty</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Numerical / Integer Type</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_num_val">2</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="comp_num_val">4</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">Exact decimal or integer answer</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('comp_num', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="comp_num" min="0" max="10" value="2" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('comp_num', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">Exact decimal or integer calculation without negative penalty</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('comp_num', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="comp_num" min="0" max="15" value="4" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_num', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
 
                 <!-- Comp 4: Assertion-Reason -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">Reasoning</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Assertion - Reasoning</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-purple-100 text-purple-800 border border-purple-200">+4, -1 Penalty</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Assertion - Reasoning</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_ar_val">2</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="comp_ar_val">3</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">Statement I & II logical verification</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('comp_ar', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="comp_ar" min="0" max="8" value="2" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('comp_ar', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">Statement I & II logical verification and reasoning analysis</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('comp_ar', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="comp_ar" min="0" max="12" value="3" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_ar', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
 
                 <!-- Comp 5: Matrix Match -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800 border border-teal-200">Matrix</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Matrix Match Columns</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-teal-100 text-teal-800 border border-teal-200">+4, Partial</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Matrix Match Columns</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_mat_val">1</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="comp_mat_val">2</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">Column I (A-D) vs Column II (p-s)</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('comp_mat', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="comp_mat" min="0" max="4" value="1" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('comp_mat', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">Column I (A-D) vs Column II (p-s) cross-concept matching</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('comp_mat', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="comp_mat" min="0" max="8" value="2" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_mat', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
 
                 <!-- Comp 6: Paragraph Comprehension -->
-                <div style="background-color: #FDFBD6;" class="p-3.5 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
+                <div style="background-color: #FDFBD6;" class="p-3.5 sm:p-4 rounded-xl border border-[#ded88e] hover:bg-white transition text-slate-900 shadow-2xs">
                   <div class="flex justify-between items-start mb-1.5">
                     <div>
-                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">Passage</span>
-                      <h4 class="font-bold text-slate-900 text-xs mt-1">Paragraph Comprehension</h4>
+                      <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-rose-100 text-rose-800 border border-rose-200">+4 Each</span>
+                      <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm mt-1">Paragraph Comprehension</h4>
                     </div>
-                    <span class="font-mono font-bold text-brand-700 text-sm" id="comp_para_val">1</span>
+                    <span class="font-mono font-extrabold text-brand-700 text-base" id="comp_para_val">1</span>
                   </div>
-                  <p class="text-[11px] text-slate-600 mb-2.5">Context narrative with linked problems</p>
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="adjustCount('comp_para', -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">-</button>
-                    <input type="range" id="comp_para" min="0" max="4" value="1" oninput="updateCounts()" class="flex-1 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
-                    <button type="button" onclick="adjustCount('comp_para', 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-xs cursor-pointer shadow-2xs">+</button>
+                  <p class="text-[11px] text-slate-600 mb-3 font-medium">Context narrative passage with linked analytical problems</p>
+                  <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="adjustCount('comp_para', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">-</button>
+                    <input type="range" id="comp_para" min="0" max="6" value="1" oninput="updateCounts()" class="flex-1 h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-brand-600">
+                    <button type="button" onclick="adjustCount('comp_para', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold flex items-center justify-center text-sm cursor-pointer shadow-2xs transition active:scale-95">+</button>
                   </div>
                 </div>
               </div>
@@ -1187,16 +1204,16 @@
       currentDiscipline: 'Computer Science & IT',
       customSubjects: [],       // [{ id: 'cust_...', name: 'Robotics' }]
       counts: {
-        board_mcq: 5,
-        board_vsa: 3,
-        board_sa: 2,
-        board_la: 1,
-        board_case: 1,
-        comp_sc: 4,
-        comp_mc: 2,
-        comp_num: 2,
-        comp_ar: 2,
-        comp_mat: 1,
+        board_mcq: 10,
+        board_vsa: 5,
+        board_sa: 4,
+        board_la: 3,
+        board_case: 2,
+        comp_sc: 10,
+        comp_mc: 4,
+        comp_num: 4,
+        comp_ar: 3,
+        comp_mat: 2,
         comp_para: 1
       }
     };
@@ -1734,6 +1751,22 @@
       lucide.createIcons();
     }
 
+    /* ================= BLUEPRINT DRAWER CONTROLS ================= */
+    function toggleBlueprintDrawer(forceOpen = null) {
+      const drawer = document.getElementById('advancedBlueprintDrawer');
+      const icon = document.getElementById('blueprintDrawerIcon');
+      if (!drawer) return;
+      const isHidden = drawer.classList.contains('hidden');
+      const shouldOpen = forceOpen !== null ? forceOpen : isHidden;
+      if (shouldOpen) {
+        drawer.classList.remove('hidden');
+        if (icon) icon.classList.add('rotate-180');
+      } else {
+        drawer.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-180');
+      }
+    }
+
     function saveApiKey(andGenerate = false) {
       const geminiVal = document.getElementById('modalApiKeyInput')?.value.trim();
       const groqVal = document.getElementById('modalGroqKeyInput')?.value.trim();
@@ -1858,7 +1891,7 @@
       keys.forEach(k => {
         const el = document.getElementById(k);
         if (el) {
-          STATE.counts[k] = parseInt(el.value, 10);
+          STATE.counts[k] = parseInt(el.value, 10) || 0;
           const valEl = document.getElementById(`${k}_val`);
           if (valEl) valEl.textContent = STATE.counts[k];
         }
@@ -1884,8 +1917,13 @@
                      (STATE.counts.comp_para * 4);
       }
 
-      document.getElementById('totalQuestionsBadge').textContent = totalQuestions;
-      document.getElementById('totalMarksBadge').textContent = totalMarks;
+      const qBadge = document.getElementById('totalQuestionsBadge');
+      if (qBadge) qBadge.textContent = totalQuestions;
+      const mBadge = document.getElementById('totalMarksBadge');
+      if (mBadge) mBadge.textContent = totalMarks;
+
+      const sumBadge = document.getElementById('blueprintSummaryBadge');
+      if (sumBadge) sumBadge.textContent = `${totalQuestions} Questions • ${totalMarks} Marks`;
     }
 
     function resetAll() {
@@ -1894,8 +1932,8 @@
       switchExamMode('board');
       
       const defaults = {
-        board_mcq: 5, board_vsa: 3, board_sa: 2, board_la: 1, board_case: 1,
-        comp_sc: 4, comp_mc: 2, comp_num: 2, comp_ar: 2, comp_mat: 1, comp_para: 1
+        board_mcq: 10, board_vsa: 5, board_sa: 4, board_la: 3, board_case: 2,
+        comp_sc: 10, comp_mc: 4, comp_num: 4, comp_ar: 3, comp_mat: 2, comp_para: 1
       };
 
       Object.entries(defaults).forEach(([k, v]) => {
@@ -1904,7 +1942,7 @@
       });
 
       updateCounts();
-      showToast('Reset to default assessment blueprint');
+      showToast('Reset to default assessment blueprint (24 Questions)');
     }
 
     /* ================= MULTI-PROVIDER AI GENERATION (GEMINI / GROQ) ================= */
@@ -1972,7 +2010,7 @@
       startLoadingTimer();
 
       try {
-        // Setup AbortController for 35s timeout protection
+        // Setup AbortController for 50s timeout protection (accommodates full 20-25 questions)
         if (STATE.abortController) {
           STATE.abortController.abort();
         }
@@ -1981,7 +2019,7 @@
           if (STATE.abortController) {
             STATE.abortController.abort();
           }
-        }, 35000);
+        }, 50000);
 
         // Construct dynamic prompt with strict discipline & freshness instructions
         const promptText = buildGeminiPrompt(topic, randomSeed, variationNonce, timestamp, isReroll);
@@ -2011,6 +2049,7 @@
                 }
               ],
               temperature: 0.65,
+              max_tokens: 8192,
               response_format: {
                 type: 'json_object'
               }
@@ -2037,6 +2076,7 @@
               generationConfig: {
                 temperature: 0.65,
                 topP: 0.95,
+                maxOutputTokens: 8192,
                 responseMimeType: 'application/json'
               }
             })
@@ -2097,7 +2137,7 @@
         console.error('Generation failure:', err);
 
         if (err.name === 'AbortError') {
-          showError('Request Timed Out (35s Limit)', `The ${provider === 'groq' ? 'Groq' : 'Gemini'} API took longer than 35 seconds to respond. You can click "Load Offline Mock Fallback" to immediately view a fully structured mock test paper for this topic.`);
+          showError('Request Timed Out (50s Limit)', `The ${provider === 'groq' ? 'Groq' : 'Gemini'} API took longer than 50 seconds to respond. You can click "Load Offline Mock Fallback" to immediately view a fully structured mock test paper for this topic.`);
         } else {
           showError('Generation Request Failed', `${err.message}. You can switch models in the footer or switch to the Offline Mock Generator to view a fully styled assessment immediately.`);
         }
@@ -2117,19 +2157,66 @@
       }
 
       let specLines = [];
+      let totalQuestions = 0;
+      let totalMarks = 0;
+
       if (mode === 'board') {
-        if (STATE.counts.board_mcq > 0) specLines.push(`- Objective/MCQs (1 Mark each): exactly ${STATE.counts.board_mcq} questions`);
-        if (STATE.counts.board_vsa > 0) specLines.push(`- Very Short Answer / VSA (2 Marks each): exactly ${STATE.counts.board_vsa} questions`);
-        if (STATE.counts.board_sa > 0) specLines.push(`- Short Answer / SA (3 Marks each): exactly ${STATE.counts.board_sa} questions`);
-        if (STATE.counts.board_la > 0) specLines.push(`- Long Answer / LA (5 Marks each): exactly ${STATE.counts.board_la} questions`);
-        if (STATE.counts.board_case > 0) specLines.push(`- Case-Based / Competency Passage (4 Marks each): exactly ${STATE.counts.board_case} case study passages with sub-questions`);
+        if (STATE.counts.board_mcq > 0) {
+          specLines.push(`- Section A (Objective / MCQs - 1 Mark each): exactly ${STATE.counts.board_mcq} distinct questions`);
+          totalQuestions += STATE.counts.board_mcq;
+          totalMarks += STATE.counts.board_mcq * 1;
+        }
+        if (STATE.counts.board_vsa > 0) {
+          specLines.push(`- Section B (Very Short Answer / VSA - 2 Marks each): exactly ${STATE.counts.board_vsa} distinct questions`);
+          totalQuestions += STATE.counts.board_vsa;
+          totalMarks += STATE.counts.board_vsa * 2;
+        }
+        if (STATE.counts.board_sa > 0) {
+          specLines.push(`- Section C (Short Answer / SA - 3 Marks each): exactly ${STATE.counts.board_sa} distinct questions`);
+          totalQuestions += STATE.counts.board_sa;
+          totalMarks += STATE.counts.board_sa * 3;
+        }
+        if (STATE.counts.board_la > 0) {
+          specLines.push(`- Section D (Long Answer / LA - 5 Marks each): exactly ${STATE.counts.board_la} distinct questions`);
+          totalQuestions += STATE.counts.board_la;
+          totalMarks += STATE.counts.board_la * 5;
+        }
+        if (STATE.counts.board_case > 0) {
+          specLines.push(`- Section E (Case-Based / Numerical / Competency Problems - 4 Marks each): exactly ${STATE.counts.board_case} distinct problem passages with linked sub-questions`);
+          totalQuestions += STATE.counts.board_case;
+          totalMarks += STATE.counts.board_case * 4;
+        }
       } else {
-        if (STATE.counts.comp_sc > 0) specLines.push(`- Single Correct MCQs (+4, -1 penalty): exactly ${STATE.counts.comp_sc} questions`);
-        if (STATE.counts.comp_mc > 0) specLines.push(`- Multiple Correct MCQs (JEE/Advanced style with partial marks): exactly ${STATE.counts.comp_mc} questions`);
-        if (STATE.counts.comp_num > 0) specLines.push(`- Numerical / Integer Value Type (exact value, no negative): exactly ${STATE.counts.comp_num} questions`);
-        if (STATE.counts.comp_ar > 0) specLines.push(`- Assertion-Reasoning (Assertion & Reason statements): exactly ${STATE.counts.comp_ar} questions`);
-        if (STATE.counts.comp_mat > 0) specLines.push(`- Matrix Match / Columns (Column I A-D vs Column II p-s): exactly ${STATE.counts.comp_mat} questions`);
-        if (STATE.counts.comp_para > 0) specLines.push(`- Paragraph / Analytical Comprehension: exactly ${STATE.counts.comp_para} passage with linked MCQs`);
+        if (STATE.counts.comp_sc > 0) {
+          specLines.push(`- Section 1 (Single Correct MCQs - +4 Marks, -1 Penalty): exactly ${STATE.counts.comp_sc} distinct questions`);
+          totalQuestions += STATE.counts.comp_sc;
+          totalMarks += STATE.counts.comp_sc * 4;
+        }
+        if (STATE.counts.comp_mc > 0) {
+          specLines.push(`- Section 2 (Multiple Correct MCQs - Advanced +4 Marks, partial marking): exactly ${STATE.counts.comp_mc} distinct questions`);
+          totalQuestions += STATE.counts.comp_mc;
+          totalMarks += STATE.counts.comp_mc * 4;
+        }
+        if (STATE.counts.comp_num > 0) {
+          specLines.push(`- Section 3 (Numerical / Integer Value Type - +4 Marks, exact calculation): exactly ${STATE.counts.comp_num} distinct questions`);
+          totalQuestions += STATE.counts.comp_num;
+          totalMarks += STATE.counts.comp_num * 4;
+        }
+        if (STATE.counts.comp_ar > 0) {
+          specLines.push(`- Section 4 (Assertion-Reasoning - +4 Marks, -1 Penalty): exactly ${STATE.counts.comp_ar} distinct questions`);
+          totalQuestions += STATE.counts.comp_ar;
+          totalMarks += STATE.counts.comp_ar * 4;
+        }
+        if (STATE.counts.comp_mat > 0) {
+          specLines.push(`- Section 5 (Matrix Match Columns - +4 Marks): exactly ${STATE.counts.comp_mat} distinct questions (Column I A-D vs Column II p-s)`);
+          totalQuestions += STATE.counts.comp_mat;
+          totalMarks += STATE.counts.comp_mat * 4;
+        }
+        if (STATE.counts.comp_para > 0) {
+          specLines.push(`- Section 6 (Paragraph / Analytical Comprehension - +4 Marks): exactly ${STATE.counts.comp_para} comprehensive passage with linked questions`);
+          totalQuestions += STATE.counts.comp_para;
+          totalMarks += STATE.counts.comp_para * 4;
+        }
       }
 
       return `You are a distinguished national exam authority, university dean, and pedagogical assessment specialist.
@@ -2161,8 +2248,17 @@ Tailor the notation, conventions, terminology, and domain-specific rigor strictl
 - If Economics/Commerce: Emphasize micro/macroeconomic models, market equilibriums, elasticity formulas, and fiscal equations.
 - If Custom/Other: Faithfully respect all specialized terminology, theories, equations, and literature relevant to "${subject}".
 
-REQUIRED QUESTION COUNTS & TYPES:
+MANDATORY QUESTION VOLUME & CATEGORY SPECIFICATIONS:
+TOTAL NUMBER OF QUESTIONS REQUIRED: EXACTLY ${totalQuestions} QUESTIONS TOTAL.
+MAXIMUM MARKS FOR EXAMINATION: EXACTLY ${totalMarks} MARKS.
+
+REQUIRED SECTION-BY-SECTION BLUEPRINT BREAKDOWN:
 ${specLines.join('\n')}
+
+STRICT COMPLETION & NON-TRUNCATION DIRECTIVE:
+1. You MUST generate ALL ${totalQuestions} questions requested above. Do NOT stop after just a few questions, and do NOT truncate the output.
+2. Number the questions sequentially from 1 to ${totalQuestions} across all sections.
+3. Every single question MUST include complete text, authentic LaTeX formulas, options or problem constraints, and a complete step-by-step solution with marking rubric.
 
 PEDAGOGICAL & SCIENTIFIC REQUIREMENTS:
 1. Every question must be original, mathematically rigorous, and authentic to the topic.
@@ -2182,7 +2278,7 @@ OUTPUT MUST BE VALID JSON STRICTLY ADHERING TO THIS SCHEMA:
   "targetLevel": "${targetLevel}",
   "difficulty": "${difficulty}",
   "estimatedTimeMinutes": 60,
-  "totalMarks": number,
+  "totalMarks": ${totalMarks},
   "generalInstructions": [
     "string instruction 1",
     "string instruction 2",
